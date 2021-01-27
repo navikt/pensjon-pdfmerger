@@ -6,9 +6,10 @@ COPY pom.xml /build/pom.xml
 RUN mvn dependency:go-offline
 
 # Build application
+COPY .editorconfig /build/
 COPY src /build/src
 RUN find .
-RUN mvn verify
+RUN mvn -Dkotlin.format.skip=true verify
 
 FROM adoptopenjdk:11-jre-hotspot
 
