@@ -31,27 +31,38 @@ class ApplicationTest {
         val expectedPageCount = PDDocument.load(documentA).numberOfPages + PDDocument.load(documentB).numberOfPages
 
         withTestApplication(Application::main) {
-            with(handleRequest(Post, "/merge") {
-                val boundary = "***bbb***"
+            with(
+                handleRequest(Post, "/merge") {
+                    val boundary = "***bbb***"
 
-                addHeader(HttpHeaders.ContentType, ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString())
-                setBody(boundary, listOf(
-                    FileItem({ documentA.inputStream().asInput() }, {}, headersOf(
-                        ContentDisposition,
-                        File
-                            .withParameter(Name, "a")
-                            .withParameter(FileName, "a.pdf")
-                            .toString()
-                    )),
-                    FileItem({ ApplicationTest::class.java.getResourceAsStream("/b.pdf").asInput() }, {}, headersOf(
-                        ContentDisposition,
-                        File
-                            .withParameter(Name, "b")
-                            .withParameter(FileName, "b.pdf")
-                            .toString()
-                    )),
-                ))
-            }) {
+                    addHeader(HttpHeaders.ContentType, ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString())
+                    setBody(
+                        boundary,
+                        listOf(
+                            FileItem(
+                                { documentA.inputStream().asInput() }, {},
+                                headersOf(
+                                    ContentDisposition,
+                                    File
+                                        .withParameter(Name, "a")
+                                        .withParameter(FileName, "a.pdf")
+                                        .toString()
+                                )
+                            ),
+                            FileItem(
+                                { ApplicationTest::class.java.getResourceAsStream("/b.pdf").asInput() }, {},
+                                headersOf(
+                                    ContentDisposition,
+                                    File
+                                        .withParameter(Name, "b")
+                                        .withParameter(FileName, "b.pdf")
+                                        .toString()
+                                )
+                            ),
+                        )
+                    )
+                }
+            ) {
                 assertEquals(
                     expected = OK,
                     actual = response.status()
