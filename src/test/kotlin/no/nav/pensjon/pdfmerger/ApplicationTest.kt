@@ -5,55 +5,72 @@ import io.ktor.http.*
 import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentDisposition.Parameters.FileName
 import io.ktor.http.ContentDisposition.Parameters.Name
+import io.ktor.http.ContentType.MultiPart.FormData
 import io.ktor.http.HttpHeaders.ContentDisposition
+import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpMethod.Companion.Get
 import io.ktor.http.HttpMethod.Companion.Post
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.content.PartData.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.streams.*
-import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDDocument.load
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ApplicationTest {
-    @Test fun `ping returns 200 status ok`() = withTestApplication(Application::main) {
+    @Test
+    fun `ping returns 200 status ok`() = withTestApplication(Application::main) {
         with(handleRequest(Get, "/ping")) {
             assertEquals(OK, response.status())
         }
     }
 
-    @Test fun `posting documents to the merge endpoint, returns a merged document and updates the documents metrics`() {
-        val documentA: ByteArray = ApplicationTest::class.java.getResourceAsStream("/a.pdf").readBytes()
-        val documentB: ByteArray = ApplicationTest::class.java.getResourceAsStream("/b.pdf").readBytes()
-        val expectedPageCount = PDDocument.load(documentA).numberOfPages + PDDocument.load(documentB).numberOfPages
+    /**
+     * Posting documents to the /merge endpoint should
+     * - return a merged document
+     * - update the metrics of the /metrics endpoint
+     * The merging is tested by counting the number of pages in the input documents and
+     * expecting the merged document to have a page count equal to the sum of pages of the
+     * input documents.
+     */
+    @Test
+    fun `posting documents to the merge endpoint`() {
+        val documentA = readTestResource("/a.pdf")
+        val documentB = readTestResource("/b.pdf")
 
         withTestApplication(Application::main) {
             with(
                 handleRequest(Post, "/merge") {
                     val boundary = "***bbb***"
 
-                    addHeader(HttpHeaders.ContentType, ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString())
+                    addHeader(
+                        name = ContentType,
+                        value = FormData.withParameter(name = "boundary", value = boundary)
+                            .toString()
+                    )
                     setBody(
-                        boundary,
-                        listOf(
+                        boundary = boundary,
+                        parts = listOf(
                             FileItem(
-                                { documentA.inputStream().asInput() }, {},
-                                headersOf(
-                                    ContentDisposition,
-                                    File
+                                provider = { documentA.inputStream().asInput() },
+                                dispose = {},
+                                partHeaders = headersOf(
+                                    name = ContentDisposition,
+                                    value = File
                                         .withParameter(Name, "a")
                                         .withParameter(FileName, "a.pdf")
                                         .toString()
                                 )
                             ),
                             FileItem(
-                                { ApplicationTest::class.java.getResourceAsStream("/b.pdf").asInput() }, {},
-                                headersOf(
-                                    ContentDisposition,
-                                    File
+                                provider = { documentB.inputStream().asInput() },
+                                dispose = {},
+                                partHeaders = headersOf(
+                                    name = ContentDisposition,
+                                    value = File
                                         .withParameter(Name, "b")
                                         .withParameter(FileName, "b.pdf")
                                         .toString()
@@ -69,25 +86,41 @@ class ApplicationTest {
                 )
 
                 assertEquals(
-                    expected = expectedPageCount,
-                    message = "Expected the response to have a page count equal to the sum of pages in the input documents",
-                    actual = PDDocument.load(response.byteContent).numberOfPages
+                    expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
+                    actual = load(response.byteContent).numberOfPages,
+                    message = "The merged document should have a page count" +
+                        " equal to the sum of pages in the input documents"
                 )
             }
 
             with(handleRequest(Get, "/metrics")) {
-                assertEquals(OK, response.status())
-                assertEquals(expected = documentA.size + documentB.size, actual = getMetric("merger_document_size_bytes_sum").toInt())
-                assertTrue { getMetric("merger_merged_document_size_bytes_sum").toInt() > 0 }
-                assertEquals(expected = 2, actual = getMetric("merger_document_count_files_sum").toLong())
-                assertEquals(expected = 1, actual = getMetric("merger_call_count_calls_total").toLong())
+                assertEquals(
+                    expected = OK,
+                    actual = response.status()
+                )
+                assertTrue { metric("merger_merged_document_size_bytes_sum").toInt() > 0 }
+                assertEquals(
+                    expected = documentA.size + documentB.size,
+                    actual = metric("merger_document_size_bytes_sum").toInt()
+                )
+                assertEquals(
+                    expected = 2,
+                    actual = metric("merger_document_count_files_sum").toLong()
+                )
+                assertEquals(
+                    expected = 1,
+                    actual = metric("merger_call_count_calls_total").toLong()
+                )
             }
         }
     }
 
-    private fun TestApplicationCall.getMetric(metric: String): String {
-        val matchResult = Regex("$metric (\\d+)").find(response.content!!)
-        assertNotNull(matchResult, message = "Metric $metric was missing")
+    private fun readTestResource(s: String) =
+        javaClass.getResourceAsStream(s).readBytes()
+
+    private fun TestApplicationCall.metric(name: String): String {
+        val matchResult = Regex("$name (\\d+)").find(response.content!!)
+        assertNotNull(matchResult, message = "Metric $name was missing")
 
         val (size) = matchResult.destructured
         return size
