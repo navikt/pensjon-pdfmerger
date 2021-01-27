@@ -2,7 +2,6 @@ package no.nav.pensjon.pdfmerger
 
 import io.ktor.application.*
 import io.ktor.features.*
-import io.ktor.features.CallLogging.Internals.withMDCBlock
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.Pdf
 import io.ktor.http.content.*
@@ -23,61 +22,67 @@ import org.slf4j.event.Level
 
 val logger: Logger = getLogger(Application::class.java)
 
-fun main() {
+fun Application.main() {
     val pdfMerger = PdfMerger()
     val appMicrometerRegistry = PrometheusMeterRegistry(DEFAULT)
 
-    embeddedServer(Netty, port = 8080) {
-        install(MicrometerMetrics) {
-            registry = appMicrometerRegistry
+    install(MicrometerMetrics) {
+        registry = appMicrometerRegistry
 
-            meterBinders = listOf(
-                JvmMemoryMetrics(),
-                JvmGcMetrics(),
-                ProcessorMetrics(),
-                pdfMerger
-            )
+        meterBinders = listOf(
+            JvmMemoryMetrics(),
+            JvmGcMetrics(),
+            ProcessorMetrics(),
+            pdfMerger
+        )
+    }
+
+    install(CallLogging) {
+        mdc("application-id") { call ->
+            call.request.headers["x-application-id"]
         }
 
-        install(CallLogging) {
-            mdc("application-id") { call ->
-                call.request.headers["x-application-id"]
-            }
-
-            mdc("correlation-id") { call ->
-                call.request.headers["x-correlation-id"]
-            }
-
-            level = Level.INFO
-            filter { call -> call.request.path().startsWith("/") }
+        mdc("correlation-id") { call ->
+            call.request.headers["x-correlation-id"]
         }
 
-        routing {
-            get("/ping") {
-                call.respondText { "PONG" }
-            }
+        level = Level.INFO
+        filter { call -> call.request.path().startsWith("/") }
+    }
 
-            get("/metrics") {
-                call.respond(appMicrometerRegistry.scrape())
-            }
+    routing {
+        get("/ping") {
+            call.respondText { "PONG" }
+        }
 
-            post("/merge") {
-                try {
-                    val documents = call.receiveMultipart()
-                        .readAllParts()
-                        .filterIsInstance<PartData.FileItem>()
-                        .map { it.streamProvider().readAllBytes() }
+        get("/metrics") {
+            call.respond(appMicrometerRegistry.scrape())
+        }
 
-                    val mergedDocument = pdfMerger.mergeDocuments(documents)
+        post("/merge") {
+            try {
+                val documents = call.receiveMultipart()
+                    .readAllParts()
+                    .filterIsInstance<PartData.FileItem>()
+                    .map { it.streamProvider().readAllBytes() }
 
-                    call.respondBytes(bytes = mergedDocument, contentType = Pdf)
-                } catch (e: Exception) {
-                    logger.error("Unable to merge pdf documents", e)
-                    call.response.status(HttpStatusCode.InternalServerError)
-                    call.respondText { "Unable to merge PDF documents ${e.message}" }
-                }
+                val mergedDocument = pdfMerger.mergeDocuments(documents)
+
+                call.respondBytes(bytes = mergedDocument, contentType = Pdf)
+            } catch (e: Exception) {
+                logger.error("Unable to merge pdf documents", e)
+                call.response.status(HttpStatusCode.InternalServerError)
+                call.respondText { "Unable to merge PDF documents ${e.message}" }
             }
         }
     }
-        .start(true)
+}
+
+fun main() {
+    embeddedServer(
+        factory = Netty,
+        port = 8080,
+        module = Application::main
+    )
+        .start(wait = true)
 }
