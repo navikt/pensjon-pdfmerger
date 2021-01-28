@@ -1,0 +1,80 @@
+{
+	"info": {
+		"_postman_id": "8dca1106-278a-4ebf-8b12-dcd4506a2a5a",
+		"name": "pdfmerger",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Merge two PDF files",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type to be application/pdf\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/pdf\");",
+							"});",
+							"",
+							"pm.test(\"Body to be greater than 20 KB\", function () {",
+							"    pm.expect(pm.response.size().body).to.be.greaterThan(20480)",
+							"});",
+							"",
+							"pm.test(\"Body starts with the PDF file signature\", function () {",
+							"    pm.expect(pm.response.text()).to.satisfy(text => text.startsWith(\"%PDF-\"));",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "",
+							"type": "file",
+							"src": [
+								"./a.pdf",
+								"./b.pdf"
+							]
+						},
+						{
+							"key": "",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/merge",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"merge"
+					]
+				},
+				"description": "Merge two valid files and assert successful feedback"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "localhost"
+		}
+	]
+}
