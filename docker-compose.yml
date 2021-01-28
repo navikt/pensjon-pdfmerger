@@ -1,0 +1,13 @@
+version: '2.1'
+services:
+  pdfmerger:
+    container_name: pdfmerger
+    image: ${PDFMERGER_IMAGE}
+
+  test:
+    depends_on:
+      - pdfmerger
+    image: postman/newman:alpine
+    volumes:
+      - ./src/test/resources:/etc/newman:ro
+    command: run -e docker-compose.postman_environment.json pdfmerger.postman_collection.json
