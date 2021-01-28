@@ -142,6 +142,10 @@
                         <goals><goal>compile</goal></goals>
                         <configuration>
                             <jvmTarget>${java.version}</jvmTarget>
+                            <args>
+                                <arg>-Xjsr305=strict</arg>
+                                <arg>-Werror</arg>
+                            </args>
                         </configuration>
                     </execution>
                     <execution>
@@ -149,6 +153,10 @@
                         <goals><goal>test-compile</goal></goals>
                         <configuration>
                             <jvmTarget>${java.version}</jvmTarget>
+                            <args>
+                                <arg>-Xjsr305=strict</arg>
+                                <arg>-Werror</arg>
+                            </args>
                         </configuration>
                     </execution>
                 </executions>
