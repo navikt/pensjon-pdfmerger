@@ -6,6 +6,38 @@
 	},
 	"item": [
 		{
+			"name": "Ping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:8080/ping",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Merge two PDF files",
 			"event": [
 				{
@@ -67,6 +99,45 @@
 					]
 				},
 				"description": "Merge two valid files and assert successful feedback"
+			},
+			"response": []
+		},
+		{
+			"name": "Metrics",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Body contains merger metrics\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"merger_document_size_bytes\");",
+							"    pm.expect(pm.response.text()).to.include(\"merger_merged_document_size_bytes\");",
+							"    pm.expect(pm.response.text()).to.include(\"merger_merge_timer_seconds\");",
+							"    pm.expect(pm.response.text()).to.include(\"merger_document_count_files\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:8080/metrics",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"metrics"
+					]
+				}
 			},
 			"response": []
 		}
