@@ -16,6 +16,11 @@ spec:
     path: "/ping"
     initialDelay: 3
     timeout: 1
+  resources:
+    limits:
+      memory: "2048Mi"
+    requests:
+      memory: "1024Mi"
   prometheus:
     enabled: true
     path: "/metrics"
