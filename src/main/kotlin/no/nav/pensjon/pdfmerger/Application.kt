@@ -42,9 +42,8 @@ fun Application.main() {
             call.request.headers["x-application-id"]
         }
 
-        mdc("correlation-id") { call ->
-            call.request.headers["x-correlation-id"]
-        }
+        mdc("correlation-id", ::correlationId)
+        mdc("transaction", ::correlationId)
 
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
@@ -77,6 +76,11 @@ fun Application.main() {
         }
     }
 }
+
+private fun correlationId(call: ApplicationCall) = listOfNotNull(
+    call.request.headers["Nav-Call-Id"],
+    call.request.headers["x-correlation-id"]
+).firstOrNull()
 
 fun main() {
     embeddedServer(
