@@ -1,12 +1,18 @@
-version: '2.1'
+version: "2.4"
 services:
   pdfmerger:
     container_name: pdfmerger
     image: ${PDFMERGER_IMAGE}
+    healthcheck:
+      test: curl http://localhost:8080/ping
+      interval: 1s
+      timeout: 3s
+      retries: 60
 
   test:
     depends_on:
-      - pdfmerger
+      pdfmerger:
+        condition: service_healthy
     image: postman/newman:alpine
     volumes:
       - ./src/test/resources:/etc/newman:ro
