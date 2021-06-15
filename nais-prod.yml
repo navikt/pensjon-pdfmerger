@@ -5,6 +5,9 @@ metadata:
   namespace: "teampensjon"
   labels:
     team: "teampensjon"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "25M"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
 spec:
   image: "{{{ image }}}"
   port: 8080
@@ -27,6 +30,3 @@ spec:
   ingresses:
     - "https://pensjon-pdfmerger.adeo.no"
     - "https://pensjon-pdfmerger.intern.nav.no"
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "25M"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
