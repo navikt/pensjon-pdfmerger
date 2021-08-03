@@ -1,5 +1,6 @@
 package no.nav.pensjon.pdfmerger
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -66,6 +67,40 @@ fun Application.main() {
                     .map { it.streamProvider().readAllBytes() }
 
                 val mergedDocument = pdfMerger.mergeDocuments(documents)
+
+                call.respondBytes(bytes = mergedDocument, contentType = Pdf)
+            } catch (e: Exception) {
+                logger.error("Unable to merge pdf documents", e)
+                call.response.status(HttpStatusCode.InternalServerError)
+                call.respondText { "Unable to merge PDF documents ${e.message}" }
+            }
+        }
+
+        post("/mergeWithSeparator") {
+            try {
+
+                val documents: MutableMap<String, ByteArray> = mutableMapOf()
+                val info: MutableList<String> = mutableListOf()
+
+                val multipartData = call.receiveMultipart()
+                        multipartData.forEachPart { part ->
+                            when (part) {
+                                is  PartData.FileItem -> {
+                                    val filename = part.originalFileName as String
+                                    documents.put(filename, part.streamProvider().readBytes())
+                                }
+                                is PartData.FormItem -> {
+                                    info.add(part.value)
+                                }
+                                is PartData.BinaryItem -> TODO()
+                            }
+                        }
+                //TODO: Legg på validering
+                // antall filer stemmer med json
+                val mapper = jacksonObjectMapper()
+                val mergeInfo: MergeInfo = mapper.readValue(info.get(0), MergeInfo::class.java)
+
+                val mergedDocument = pdfMerger.mergeWithSeparator(mergeInfo, documents)
 
                 call.respondBytes(bytes = mergedDocument, contentType = Pdf)
             } catch (e: Exception) {

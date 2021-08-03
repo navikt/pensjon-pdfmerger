@@ -42,6 +42,28 @@ class PdfMerger : MeterBinder {
         }!!
     }
 
+    fun mergeWithSeparator(
+        info: MergeInfo,
+        documents: Map<String, ByteArray>
+    ): ByteArray {
+        callCount.increment() //TODO: hva skal telles her?
+
+        return mergeTimer.recordCallable {//TODO: bør vi vite hvilken operasjon som måles?
+
+            info.gjelderID
+            documentCount.record(documents.size.toDouble())
+            documents.forEach {
+                documentSize.record(it.key.length.toDouble())
+            }
+            val merger = DocumentMerger(info.gjelderID, info.gjelderName, info.documentinfo, documents)
+            val mergedDocument = merger.generatePdfResponse()
+
+            mergedDocumentSize.record(mergedDocument.size.toDouble())
+
+            mergedDocument
+        }
+    }
+
     override fun bindTo(meterRegistry: MeterRegistry) {
         documentCount = DistributionSummary.builder("merger.document.count")
             .description("Number of documents to merge per call")
