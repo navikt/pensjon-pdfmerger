@@ -84,23 +84,25 @@ fun Application.main() {
                 val info: MutableList<String> = mutableListOf()
 
                 val multipartData = call.receiveMultipart()
-                        multipartData.forEachPart { part ->
-                            when (part) {
-                                is  PartData.FileItem -> {
-                                    val filename = part.originalFileName as String
-                                    documents.put(filename, part.streamProvider().readBytes())
-                                }
-                                is PartData.FormItem -> {
-                                    info.add(part.value)
-                                }
-                                is PartData.BinaryItem -> {}
-                            }
+                multipartData.forEachPart { part ->
+                    when (part) {
+                        is  PartData.FileItem -> {
+                            val filename = part.originalFileName as String
+                            documents.put(filename, part.streamProvider().readBytes())
                         }
-                //TODO: hvordan sende jobben videre uten blocking?
+                        is PartData.FormItem -> {
+                            info.add(part.value)
+                        }
+                        is PartData.BinaryItem -> {}
+                    }
+                }
+                // TODO: hvordan sende jobben videre uten blocking?
                 val mapper = jacksonObjectMapper()
-                val mergeInfoRequest: MergeInfoRequest = mapper.readValue(info.get(0), MergeInfoRequest::class.java)
+                val mergeInfoRequest: MergeInfoRequest =
+                    mapper.readValue(info.get(0), MergeInfoRequest::class.java)
 
-                val mergeinfo: MergeInfo = mapRequestToDomainAndValidate(mergeInfoRequest, documents)
+                val mergeinfo: MergeInfo =
+                    mapRequestToDomainAndValidate(mergeInfoRequest, documents)
 
                 val mergedDocument = pdfMerger.mergeWithSeparator(mergeinfo)
 
