@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream
 import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
 
-//TODO: hvordan skal dokumentene sorteres? Her eller i pesys?
+// TODO: hvordan skal dokumentene sorteres? Her eller i pesys?
 class DocumentMerger(
     val mergeinfo: MergeInfo
 ) {
@@ -106,9 +106,11 @@ class DocumentMerger(
             cell.horizontalAlignment = Element.ALIGN_CENTER
 
             contentsTable.apply {
-                addCell(Phrase("" + documentNr++ + " av " + mergeinfo.documentinfo.size, NORMAL_FONT))
+                addCell(Phrase("" + documentNr++ + " av " +
+                        mergeinfo.documentinfo.size, NORMAL_FONT))
                 addCell(cell)
-                addCell(Phrase(documentinfo.mottattSendtDato.format(DateTimeFormatter.ofPattern(dateFormat)), NORMAL_FONT))
+                addCell(Phrase(documentinfo.mottattSendtDato
+                    .format(DateTimeFormatter.ofPattern(dateFormat)), NORMAL_FONT))
                 addCell(Phrase(documentinfo.fagomrade, NORMAL_FONT))
                 addCell(Phrase(documentinfo.saknr, NORMAL_FONT))
                 addCell(Phrase(documentinfo.avsenderMottaker, NORMAL_FONT))
@@ -155,7 +157,8 @@ class DocumentMerger(
 //        empty.setSpacingAfter(SPACING.toFloat())
 //        document.add(empty)
 //        val info = Paragraph(
-//            String.format("Henting av PDF-dokumentet %s eller en av dens vedlegg feilet.", documentname),
+//            String.format("Henting av PDF-dokumentet %s
+//            eller en av dens vedlegg feilet.", documentname),
 //            INFO_FONT_BOLD
 //        )
 //        info.setAlignment(Paragraph.ALIGN_CENTER)
@@ -192,11 +195,11 @@ class DocumentMerger(
         }
     }
 
-    private fun createDocInfoLine(docNum: Int, totalDocs: Int, documentinfo: Documentinfo): Paragraph {
-        val innhold = if (documentinfo.documentName.isEmpty()) ": " + documentinfo.documentName else ""
-        return createCenterInfoParagraph(
-            "Dokument nr " + docNum + " av " + totalDocs
-                    + innhold
+    private fun createDocInfoLine(docNum: Int, totalDocs: Int, docinfo: Documentinfo)
+    : Paragraph {
+        val innhold = if (docinfo.documentName.isEmpty()) ": " + docinfo.documentName else ""
+        return createCenterInfoParagraph("Dokument nr " + docNum + " av " +
+                totalDocs + innhold
         )
     }
 

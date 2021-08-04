@@ -46,9 +46,9 @@ class PdfMerger : MeterBinder {
     fun mergeWithSeparator(
         mergeinfo: MergeInfo,
     ): ByteArray {
-        callCount.increment() //TODO: hva skal telles her?
+        callCount.increment() // TODO: hva skal telles her?
 
-        return mergeTimer.recordCallable {//TODO: bør vi vite hvilken operasjon som måles?
+        return mergeTimer.recordCallable { // TODO: bør vi vite hvilken operasjon som måles?
 
             mergeinfo.gjelderID
 //            documentCount.record(documents.size.toDouble())
