@@ -10,7 +10,11 @@ fun mapRequestToDomainAndValidate(
     info: MergeInfoRequest,
     documents: MutableMap<String, ByteArray>
 ): MergeInfo {
-    return MergeInfo(info.gjelderID, info.gjelderName, mapDocumentsinfoRequestToDomainAndValidate(info, documents))
+    return MergeInfo(
+        info.gjelderID,
+        info.gjelderName,
+        mapDocumentsinfoRequestToDomainAndValidate(info, documents)
+    )
 }
 
 fun mapDocumentsinfoRequestToDomainAndValidate(
@@ -20,10 +24,18 @@ fun mapDocumentsinfoRequestToDomainAndValidate(
     val documentinfo = mutableListOf<Documentinfo>()
     info.documentinfo.forEach {
         documentinfo.add(
-            Documentinfo(it.filename, it.dokumenttype, it.fagomrade, it.saknr,
-            it.avsenderMottaker, it.documentName,
-            mapStringToDate(it.mottattSendtDato), findFile(it.filename, documents),
-            mapVedleggListRequestToDomainAndValidate(it.vedleggList, documents)))
+            Documentinfo(
+                it.filename,
+                it.dokumenttype,
+                it.fagomrade,
+                it.saknr,
+                it.avsenderMottaker,
+                it.documentName,
+                mapStringToDate(it.mottattSendtDato),
+                findFile(it.filename, documents),
+                mapVedleggListRequestToDomainAndValidate(it.vedleggList, documents)
+            )
+        )
     }
 
     documentinfo.sortWith(Comparator.comparing(Documentinfo::mottattSendtDato))
@@ -36,7 +48,13 @@ fun mapVedleggListRequestToDomainAndValidate(
 ): List<VedleggDokument> {
     val vedlegglist = mutableListOf<VedleggDokument>()
     vedleggListRequest?.forEach {
-        vedlegglist.add(VedleggDokument(it.filename, it.documentName, findFile(it.filename, documents)))
+        vedlegglist.add(
+            VedleggDokument(
+                it.filename,
+                it.documentName,
+                findFile(it.filename, documents)
+            )
+        )
     }
     return vedlegglist.toList()
 }

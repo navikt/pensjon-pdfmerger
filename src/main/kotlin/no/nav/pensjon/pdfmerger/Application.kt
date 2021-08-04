@@ -86,7 +86,7 @@ fun Application.main() {
                 val multipartData = call.receiveMultipart()
                 multipartData.forEachPart { part ->
                     when (part) {
-                        is  PartData.FileItem -> {
+                        is PartData.FileItem -> {
                             val filename = part.originalFileName as String
                             documents.put(filename, part.streamProvider().readBytes())
                         }
