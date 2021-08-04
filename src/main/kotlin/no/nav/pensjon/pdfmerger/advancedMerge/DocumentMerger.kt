@@ -1,17 +1,16 @@
-package no.nav.pensjon.pdfmerger
+package no.nav.pensjon.pdfmerger.advancedMerge
 
 import com.lowagie.text.*
 import com.lowagie.text.pdf.*
+import no.nav.pensjon.pdfmerger.Documentinfo
+import no.nav.pensjon.pdfmerger.MergeInfo
 import java.io.ByteArrayOutputStream
-import java.io.IOException
+import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
 
 //TODO: hvordan skal dokumentene sorteres? Her eller i pesys?
 class DocumentMerger(
-    var gjelderId: String,
-    var gjelderNavn: String,
-    val docInfos: List<Documentinfo>,
-    val docData: Map<String, ByteArray>
+    val mergeinfo: MergeInfo
 ) {
     private val HEADING_FONT: Font = Font(Font.TIMES_ROMAN, 24f, Font.BOLD)
     private val INFO_FONT_BOLD: Font = Font(Font.TIMES_ROMAN, 18f, Font.BOLD)
@@ -19,6 +18,7 @@ class DocumentMerger(
     private val SPACING = 50
     private val PAGE_MARGIN = 10.0f
     private val EMPTY_PARAGRAPH = Paragraph(" ")
+    private val dateFormat: String = "dd.MM.yyyy"
 
     private val document: Document
     private val byteArrayOutputStream: ByteArrayOutputStream
@@ -51,8 +51,8 @@ class DocumentMerger(
 
         // Append documents with separator pages
         var i = 1
-        for (documentinfo in docInfos) {
-            createSeparatorPage(i++, docInfos.size, documentinfo)
+        for (documentinfo in mergeinfo.documentinfo) {
+            createSeparatorPage(i++, mergeinfo.documentinfo.size, documentinfo)
             appendDocumentWithVedlegg(documentinfo)
         }
         if (document.isOpen) {
@@ -72,7 +72,7 @@ class DocumentMerger(
         document.add(title)
 
         val gjelder = Paragraph()
-        gjelder.add(Chunk("$gjelderId $gjelderNavn", INFO_FONT_BOLD))
+        gjelder.add(Chunk("${mergeinfo.gjelderID} ${mergeinfo.gjelderName}", INFO_FONT_BOLD))
         gjelder.setAlignment(Paragraph.ALIGN_CENTER)
         gjelder.setSpacingAfter(SPACING.toFloat())
         document.add(gjelder)
@@ -101,14 +101,14 @@ class DocumentMerger(
         }
 
         var documentNr = 1
-        for (documentinfo in docInfos) {
+        for (documentinfo in mergeinfo.documentinfo) {
             val cell = PdfPCell(Phrase(documentinfo.dokumenttype, NORMAL_FONT))
             cell.horizontalAlignment = Element.ALIGN_CENTER
 
             contentsTable.apply {
-                addCell(Phrase("" + documentNr++ + " av " + docInfos.size, NORMAL_FONT))
+                addCell(Phrase("" + documentNr++ + " av " + mergeinfo.documentinfo.size, NORMAL_FONT))
                 addCell(cell)
-                addCell(Phrase(documentinfo.mottattSendtDato, NORMAL_FONT))
+                addCell(Phrase(documentinfo.mottattSendtDato.format(DateTimeFormatter.ofPattern(dateFormat)), NORMAL_FONT))
                 addCell(Phrase(documentinfo.fagomrade, NORMAL_FONT))
                 addCell(Phrase(documentinfo.saknr, NORMAL_FONT))
                 addCell(Phrase(documentinfo.avsenderMottaker, NORMAL_FONT))
@@ -116,7 +116,7 @@ class DocumentMerger(
                 addCell(Phrase(" ", NORMAL_FONT))
             }
 
-            documentinfo.vedleggList?.forEach { vedlegg ->
+            documentinfo.vedleggList.forEach { vedlegg ->
                 addEmptyCells(contentsTable, 7)
                 contentsTable.addCell(Phrase(vedlegg.documentName, NORMAL_FONT))
             }
@@ -125,53 +125,47 @@ class DocumentMerger(
     }
 
     private fun appendDocumentWithVedlegg(documentinfo: Documentinfo) {
-        val filenames: MutableList<String> = ArrayList()
+        val files: MutableList<ByteArray> = ArrayList()
 
-        filenames.add(documentinfo.filename)
-        documentinfo.vedleggList?.forEach { filenames.add(it.filename) }
+        files.add(documentinfo.file)
+        documentinfo.vedleggList.forEach { files.add(it.file) }
 
-        for (filename in filenames) {
-            try {
-                document.setMargins(0f, 0f, -14f, 0f)
-                val reader = PdfReader(docData.get(filename))
-                var page: PdfImportedPage
-                for (p in 1..reader.numberOfPages) {
-                    page = pdfWriter.getImportedPage(reader, p)
-                    val image = Image.getInstance(page)
-                    image.scaleToFit(PageSize.A4.width(), PageSize.A4.height())
-                    document.add(image)
-                    if (p < reader.numberOfPages) {
-                        document.newPage()
-                    }
+        for (file in files) {
+            document.setMargins(0f, 0f, -14f, 0f)
+            val reader = PdfReader(file)
+            var page: PdfImportedPage
+            for (p in 1..reader.numberOfPages) {
+                page = pdfWriter.getImportedPage(reader, p)
+                val image = Image.getInstance(page)
+                image.scaleToFit(PageSize.A4.width(), PageSize.A4.height())
+                document.add(image)
+                if (p < reader.numberOfPages) {
+                    document.newPage()
                 }
-                document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
-                document.newPage()
-                pdfWriter.freeReader(reader)
-                reader.close()
-            } catch (ex: IOException) {
-                // If document cannot be retrieved for some reason,
-                // a blank page with info about doc and error is created.
-                createErrorPage(filename)
             }
+            document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
+            document.newPage()
+            pdfWriter.freeReader(reader)
+            reader.close()
         }
     }
 
-    private fun createErrorPage(documentname: String) {
-        val empty = Paragraph(" ")
-        empty.setSpacingAfter(SPACING.toFloat())
-        document.add(empty)
-        val info = Paragraph(
-            String.format("Henting av PDF-dokumentet %s eller en av dens vedlegg feilet.", documentname),
-            INFO_FONT_BOLD
-        )
-        info.setAlignment(Paragraph.ALIGN_CENTER)
-        document.add(info)
-        document.newPage()
-    }
+//    private fun createErrorPage(documentname: String) {
+//        val empty = Paragraph(" ")
+//        empty.setSpacingAfter(SPACING.toFloat())
+//        document.add(empty)
+//        val info = Paragraph(
+//            String.format("Henting av PDF-dokumentet %s eller en av dens vedlegg feilet.", documentname),
+//            INFO_FONT_BOLD
+//        )
+//        info.setAlignment(Paragraph.ALIGN_CENTER)
+//        document.add(info)
+//        document.newPage()
+//    }
 
     private fun createSeparatorPage(docNr: Int, totalDocs: Int, dokList: Documentinfo) {
         document.add(EMPTY_PARAGRAPH)
-        val heading = Paragraph(gjelderNavn, INFO_FONT_BOLD)
+        val heading = Paragraph(mergeinfo.gjelderName, INFO_FONT_BOLD)
         heading.setSpacingAfter(SPACING.toFloat())
         heading.setAlignment(Paragraph.ALIGN_CENTER)
         document.add(heading)
@@ -206,14 +200,14 @@ class DocumentMerger(
         )
     }
 
-    private fun addVedleggToDocument(doc: Documentinfo) {
-        if (doc.vedleggList != null) {
+    private fun addVedleggToDocument(documentinfo: Documentinfo) {
+        if (!documentinfo.vedleggList.isEmpty()) {
             val spacer = Paragraph(" ")
             spacer.setSpacingAfter((SPACING / 2).toFloat())
             document.add(spacer)
             val paragraph = createCenterInfoParagraph("Vedlegg" + ": ")
             document.add(paragraph)
-            for (vedlegg in doc.vedleggList) {
+            for (vedlegg in documentinfo.vedleggList) {
                 document.add(createCenterInfoParagraph(vedlegg.documentName))
             }
         }

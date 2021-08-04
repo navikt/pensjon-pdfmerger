@@ -17,6 +17,7 @@ import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig.DEFAULT
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomainAndValidate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 import org.slf4j.event.Level
@@ -95,14 +96,13 @@ fun Application.main() {
                                 is PartData.BinaryItem -> {}
                             }
                         }
+                //TODO: hvordan sende jobben videre uten blocking?
                 val mapper = jacksonObjectMapper()
-                val mergeInfo: MergeInfo = mapper.readValue(info.get(0), MergeInfo::class.java)
+                val mergeInfoRequest: MergeInfoRequest = mapper.readValue(info.get(0), MergeInfoRequest::class.java)
 
-                //TODO: Legg på validering
-                // antall filer stemmer med json
-                // dato mappes til string
+                val mergeinfo: MergeInfo = mapRequestToDomainAndValidate(mergeInfoRequest, documents)
 
-                val mergedDocument = pdfMerger.mergeWithSeparator(mergeInfo, documents)
+                val mergedDocument = pdfMerger.mergeWithSeparator(mergeinfo)
 
                 call.respondBytes(bytes = mergedDocument, contentType = Pdf)
             } catch (e: Exception) {
