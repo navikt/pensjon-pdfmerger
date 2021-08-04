@@ -1,6 +1,5 @@
 package no.nav.pensjon.pdfmerger
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -17,7 +16,6 @@ import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig.DEFAULT
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomainAndValidate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 import org.slf4j.event.Level
@@ -96,17 +94,10 @@ fun Application.main() {
                         is PartData.BinaryItem -> {}
                     }
                 }
-                // TODO: hvordan sende jobben videre uten blocking?
-                val mapper = jacksonObjectMapper()
-                val mergeInfoRequest: MergeInfoRequest =
-                    mapper.readValue(info.get(0), MergeInfoRequest::class.java)
-
-                val mergeinfo: MergeInfo =
-                    mapRequestToDomainAndValidate(mergeInfoRequest, documents)
-
-                val mergedDocument = pdfMerger.mergeWithSeparator(mergeinfo)
-
-                call.respondBytes(bytes = mergedDocument, contentType = Pdf)
+                call.respondBytes(
+                    bytes = pdfMerger.mergeWithSeparator(info, documents),
+                    contentType = Pdf
+                )
             } catch (e: Exception) {
                 logger.error("Unable to merge pdf documents", e)
                 call.response.status(HttpStatusCode.InternalServerError)
