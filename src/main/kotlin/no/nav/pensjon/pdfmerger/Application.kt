@@ -92,13 +92,15 @@ fun Application.main() {
                                 is PartData.FormItem -> {
                                     info.add(part.value)
                                 }
-                                is PartData.BinaryItem -> TODO()
+                                is PartData.BinaryItem -> {}
                             }
                         }
-                //TODO: Legg på validering
-                // antall filer stemmer med json
                 val mapper = jacksonObjectMapper()
                 val mergeInfo: MergeInfo = mapper.readValue(info.get(0), MergeInfo::class.java)
+
+                //TODO: Legg på validering
+                // antall filer stemmer med json
+                // dato mappes til string
 
                 val mergedDocument = pdfMerger.mergeWithSeparator(mergeInfo, documents)
 

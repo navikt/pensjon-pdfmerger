@@ -2,10 +2,11 @@ package no.nav.pensjon.pdfmerger
 
 import com.lowagie.text.*
 import com.lowagie.text.pdf.*
-import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import kotlin.collections.ArrayList
 
+//TODO: hvordan skal dokumentene sorteres? Her eller i pesys?
 class DocumentMerger(
     var gjelderId: String,
     var gjelderNavn: String,
@@ -101,38 +102,38 @@ class DocumentMerger(
 
         var documentNr = 1
         for (documentinfo in docInfos) {
-            val cell = PdfPCell(Phrase("dokumenttype", NORMAL_FONT))
+            val cell = PdfPCell(Phrase(documentinfo.dokumenttype, NORMAL_FONT))
             cell.horizontalAlignment = Element.ALIGN_CENTER
 
             contentsTable.apply {
                 addCell(Phrase("" + documentNr++ + " av " + docInfos.size, NORMAL_FONT))
                 addCell(cell)
-                addCell(Phrase("en dato", NORMAL_FONT))
-                addCell(Phrase("fagområde", NORMAL_FONT))
-                addCell(Phrase("sakid", NORMAL_FONT))
-                addCell(Phrase("avsender/mottaker", NORMAL_FONT))
+                addCell(Phrase(documentinfo.mottattSendtDato, NORMAL_FONT))
+                addCell(Phrase(documentinfo.fagomrade, NORMAL_FONT))
+                addCell(Phrase(documentinfo.saknr, NORMAL_FONT))
+                addCell(Phrase(documentinfo.avsenderMottaker, NORMAL_FONT))
                 addCell(Phrase(documentinfo.documentName, NORMAL_FONT))
                 addCell(Phrase(" ", NORMAL_FONT))
             }
 
-            documentinfo.vedleggNames?.forEach { name ->
+            documentinfo.vedleggList?.forEach { vedlegg ->
                 addEmptyCells(contentsTable, 7)
-                contentsTable.addCell(Phrase(name, NORMAL_FONT))
+                contentsTable.addCell(Phrase(vedlegg.documentName, NORMAL_FONT))
             }
         }
         return contentsTable
     }
 
     private fun appendDocumentWithVedlegg(documentinfo: Documentinfo) {
-        val documentnames: MutableList<String> = ArrayList()
+        val filenames: MutableList<String> = ArrayList()
 
-        documentnames.add(documentinfo.documentName)
-        documentinfo.vedleggNames?.let { documentnames.addAll(it) }
+        filenames.add(documentinfo.filename)
+        documentinfo.vedleggList?.forEach { filenames.add(it.filename) }
 
-        for (documentname in documentnames) {
+        for (filename in filenames) {
             try {
                 document.setMargins(0f, 0f, -14f, 0f)
-                val reader = PdfReader(docData.get(documentname))
+                val reader = PdfReader(docData.get(filename))
                 var page: PdfImportedPage
                 for (p in 1..reader.numberOfPages) {
                     page = pdfWriter.getImportedPage(reader, p)
@@ -150,7 +151,7 @@ class DocumentMerger(
             } catch (ex: IOException) {
                 // If document cannot be retrieved for some reason,
                 // a blank page with info about doc and error is created.
-                createErrorPage(documentname)
+                createErrorPage(filename)
             }
         }
     }
@@ -206,14 +207,14 @@ class DocumentMerger(
     }
 
     private fun addVedleggToDocument(doc: Documentinfo) {
-        if (doc.vedleggNames != null) {
+        if (doc.vedleggList != null) {
             val spacer = Paragraph(" ")
             spacer.setSpacingAfter((SPACING / 2).toFloat())
             document.add(spacer)
             val paragraph = createCenterInfoParagraph("Vedlegg" + ": ")
             document.add(paragraph)
-            for (vedlegg in doc.vedleggNames) {
-                document.add(createCenterInfoParagraph(vedlegg))
+            for (vedlegg in doc.vedleggList) {
+                document.add(createCenterInfoParagraph(vedlegg.documentName))
             }
         }
     }
