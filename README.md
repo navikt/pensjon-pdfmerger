@@ -7,6 +7,3 @@ Se routing i Application-fila for å se operasjonene som tilbys
 ###Fra IntelliJ
 Kjør main fra Application-fila
 
-###I Docker
-Kjør $docker-compose up
-
