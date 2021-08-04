@@ -106,11 +106,20 @@ class DocumentMerger(
             cell.horizontalAlignment = Element.ALIGN_CENTER
 
             contentsTable.apply {
-                addCell(Phrase("" + documentNr++ + " av " +
-                        mergeinfo.documentinfo.size, NORMAL_FONT))
+                addCell(
+                    Phrase(
+                        "" + documentNr++ + " av " + mergeinfo.documentinfo.size, NORMAL_FONT
+                    )
+                )
                 addCell(cell)
-                addCell(Phrase(documentinfo.mottattSendtDato
-                    .format(DateTimeFormatter.ofPattern(dateFormat)), NORMAL_FONT))
+                addCell(
+                    Phrase(
+                        documentinfo.mottattSendtDato.format(
+                            DateTimeFormatter.ofPattern(dateFormat)
+                        ),
+                        NORMAL_FONT
+                    )
+                )
                 addCell(Phrase(documentinfo.fagomrade, NORMAL_FONT))
                 addCell(Phrase(documentinfo.saknr, NORMAL_FONT))
                 addCell(Phrase(documentinfo.avsenderMottaker, NORMAL_FONT))
@@ -195,11 +204,10 @@ class DocumentMerger(
         }
     }
 
-    private fun createDocInfoLine(docNum: Int, totalDocs: Int, docinfo: Documentinfo)
-    : Paragraph {
+    private fun createDocInfoLine(docNum: Int, totalDocs: Int, docinfo: Documentinfo): Paragraph {
         val innhold = if (docinfo.documentName.isEmpty()) ": " + docinfo.documentName else ""
-        return createCenterInfoParagraph("Dokument nr " + docNum + " av " +
-                totalDocs + innhold
+        return createCenterInfoParagraph(
+            "Dokument nr " + docNum + " av " + totalDocs + innhold
         )
     }
 
