@@ -2,14 +2,13 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 
 import com.lowagie.text.*
 import com.lowagie.text.pdf.*
-import no.nav.pensjon.pdfmerger.Documentinfo
+import no.nav.pensjon.pdfmerger.Dokumentinfo
 import no.nav.pensjon.pdfmerger.MergeInfo
 import java.io.ByteArrayOutputStream
 import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
 
-// TODO: hvordan skal dokumentene sorteres? Her eller i pesys?
-class DocumentMerger(
+class AdvancedPdfMerger(
     val mergeinfo: MergeInfo
 ) {
     private val HEADING_FONT: Font = Font(Font.TIMES_ROMAN, 24f, Font.BOLD)
@@ -38,7 +37,7 @@ class DocumentMerger(
 
     /**
      * Generates the new PDF document consisting of
-     * one front page
+     * one front page with a table of content
      * for each document
      *  a separatorpage
      *  the page
@@ -51,8 +50,8 @@ class DocumentMerger(
 
         // Append documents with separator pages
         var i = 1
-        for (documentinfo in mergeinfo.documentinfo) {
-            createSeparatorPage(i++, mergeinfo.documentinfo.size, documentinfo)
+        for (documentinfo in mergeinfo.dokumentinfo) {
+            createSeparatorPage(i++, mergeinfo.dokumentinfo.size, documentinfo)
             appendDocumentWithVedlegg(documentinfo)
         }
         if (document.isOpen) {
@@ -72,7 +71,7 @@ class DocumentMerger(
         document.add(title)
 
         val gjelder = Paragraph()
-        gjelder.add(Chunk("${mergeinfo.gjelderID} ${mergeinfo.gjelderName}", INFO_FONT_BOLD))
+        gjelder.add(Chunk("${mergeinfo.gjelderID} ${mergeinfo.gjelderNavn}", INFO_FONT_BOLD))
         gjelder.setAlignment(Paragraph.ALIGN_CENTER)
         gjelder.setSpacingAfter(SPACING.toFloat())
         document.add(gjelder)
@@ -101,14 +100,14 @@ class DocumentMerger(
         }
 
         var documentNr = 1
-        for (documentinfo in mergeinfo.documentinfo) {
+        for (documentinfo in mergeinfo.dokumentinfo) {
             val cell = PdfPCell(Phrase(documentinfo.dokumenttype, NORMAL_FONT))
             cell.horizontalAlignment = Element.ALIGN_CENTER
 
             contentsTable.apply {
                 addCell(
                     Phrase(
-                        "" + documentNr++ + " av " + mergeinfo.documentinfo.size, NORMAL_FONT
+                        "" + documentNr++ + " av " + mergeinfo.dokumentinfo.size, NORMAL_FONT
                     )
                 )
                 addCell(cell)
@@ -123,23 +122,23 @@ class DocumentMerger(
                 addCell(Phrase(documentinfo.fagomrade, NORMAL_FONT))
                 addCell(Phrase(documentinfo.saknr, NORMAL_FONT))
                 addCell(Phrase(documentinfo.avsenderMottaker, NORMAL_FONT))
-                addCell(Phrase(documentinfo.documentName, NORMAL_FONT))
+                addCell(Phrase(documentinfo.dokumentnavn, NORMAL_FONT))
                 addCell(Phrase(" ", NORMAL_FONT))
             }
 
-            documentinfo.vedleggList.forEach { vedlegg ->
+            documentinfo.vedleggListe.forEach { vedlegg ->
                 addEmptyCells(contentsTable, 7)
-                contentsTable.addCell(Phrase(vedlegg.documentName, NORMAL_FONT))
+                contentsTable.addCell(Phrase(vedlegg.dokumentnavn, NORMAL_FONT))
             }
         }
         return contentsTable
     }
 
-    private fun appendDocumentWithVedlegg(documentinfo: Documentinfo) {
+    private fun appendDocumentWithVedlegg(documentinfo: Dokumentinfo) {
         val files: MutableList<ByteArray> = ArrayList()
 
-        files.add(documentinfo.file)
-        documentinfo.vedleggList.forEach { files.add(it.file) }
+        files.add(documentinfo.fil)
+        documentinfo.vedleggListe.forEach { files.add(it.fil) }
 
         for (file in files) {
             document.setMargins(0f, 0f, -14f, 0f)
@@ -161,28 +160,14 @@ class DocumentMerger(
         }
     }
 
-//    private fun createErrorPage(documentname: String) {
-//        val empty = Paragraph(" ")
-//        empty.setSpacingAfter(SPACING.toFloat())
-//        document.add(empty)
-//        val info = Paragraph(
-//            String.format("Henting av PDF-dokumentet %s
-//            eller en av dens vedlegg feilet.", documentname),
-//            INFO_FONT_BOLD
-//        )
-//        info.setAlignment(Paragraph.ALIGN_CENTER)
-//        document.add(info)
-//        document.newPage()
-//    }
-
-    private fun createSeparatorPage(docNr: Int, totalDocs: Int, dokList: Documentinfo) {
+    private fun createSeparatorPage(docNr: Int, totalDocs: Int, dokList: Dokumentinfo) {
         document.add(EMPTY_PARAGRAPH)
-        val heading = Paragraph(mergeinfo.gjelderName, INFO_FONT_BOLD)
+        val heading = Paragraph(mergeinfo.gjelderNavn, INFO_FONT_BOLD)
         heading.setSpacingAfter(SPACING.toFloat())
         heading.setAlignment(Paragraph.ALIGN_CENTER)
         document.add(heading)
         document.add(createDocInfoLine(docNr, totalDocs, dokList))
-        addVedleggToDocument(dokList)
+        addVedlegginfoToDocument(dokList)
         document.newPage()
     }
 
@@ -204,22 +189,22 @@ class DocumentMerger(
         }
     }
 
-    private fun createDocInfoLine(docNum: Int, totalDocs: Int, docinfo: Documentinfo): Paragraph {
-        val innhold = if (docinfo.documentName.isEmpty()) ": " + docinfo.documentName else ""
+    private fun createDocInfoLine(docNum: Int, totalDocs: Int, docinfo: Dokumentinfo): Paragraph {
+        val innhold = if (docinfo.dokumentnavn.isEmpty()) ": " + docinfo.dokumentnavn else ""
         return createCenterInfoParagraph(
             "Dokument nr " + docNum + " av " + totalDocs + innhold
         )
     }
 
-    private fun addVedleggToDocument(documentinfo: Documentinfo) {
-        if (!documentinfo.vedleggList.isEmpty()) {
+    private fun addVedlegginfoToDocument(documentinfo: Dokumentinfo) {
+        if (!documentinfo.vedleggListe.isEmpty()) {
             val spacer = Paragraph(" ")
             spacer.setSpacingAfter((SPACING / 2).toFloat())
             document.add(spacer)
             val paragraph = createCenterInfoParagraph("Vedlegg" + ": ")
             document.add(paragraph)
-            for (vedlegg in documentinfo.vedleggList) {
-                document.add(createCenterInfoParagraph(vedlegg.documentName))
+            for (vedlegg in documentinfo.vedleggListe) {
+                document.add(createCenterInfoParagraph(vedlegg.dokumentnavn))
             }
         }
     }

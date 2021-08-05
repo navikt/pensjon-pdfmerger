@@ -7,7 +7,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import io.micrometer.core.instrument.binder.BaseUnits
 import io.micrometer.core.instrument.binder.MeterBinder
-import no.nav.pensjon.pdfmerger.advancedMerge.DocumentMerger
+import no.nav.pensjon.pdfmerger.advancedMerge.AdvancedPdfMerger
 import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomainAndValidate
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
@@ -70,10 +70,10 @@ class PdfMerger : MeterBinder {
     ): ByteArray {
 
         mergeinfo.gjelderID
-        val merger = DocumentMerger(mergeinfo)
+        val merger = AdvancedPdfMerger(mergeinfo)
         val mergedDocument = merger.generatePdfResponse()
 
-        mergedDocumentSize.record(mergedDocument.size.toDouble())
+        mergedDocumentSize.record(mergedDocument.size.toDouble()) // TODO: bør måle størrelse på innkommende?
 
         return mergedDocument
     }

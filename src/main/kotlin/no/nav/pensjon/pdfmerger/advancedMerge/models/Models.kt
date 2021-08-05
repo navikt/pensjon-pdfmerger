@@ -3,25 +3,25 @@ package no.nav.pensjon.pdfmerger
 import java.time.LocalDate
 
 data class MergeInfo(
-    val gjelderID: String,
-    val gjelderName: String,
-    val documentinfo: List<Documentinfo>
+        val gjelderID: String,
+        val gjelderNavn: String,
+        val dokumentinfo: List<Dokumentinfo>
 )
 
-data class Documentinfo(
-    val filename: String,
-    val dokumenttype: String,
-    val fagomrade: String,
-    val saknr: String,
-    val avsenderMottaker: String,
-    val documentName: String,
-    val mottattSendtDato: LocalDate,
-    val file: ByteArray,
-    val vedleggList: List<VedleggDokument>
+data class Dokumentinfo(
+        val filnavn: String,
+        val dokumenttype: String,
+        val fagomrade: String,
+        val saknr: String,
+        val avsenderMottaker: String,
+        val dokumentnavn: String,
+        val mottattSendtDato: LocalDate,
+        val fil: ByteArray,
+        val vedleggListe: List<VedleggDokument>
 )
 
 data class VedleggDokument(
-    val filename: String,
-    val documentName: String,
-    val file: ByteArray
+        val filnavn: String,
+        val dokumentnavn: String,
+        val fil: ByteArray
 )
