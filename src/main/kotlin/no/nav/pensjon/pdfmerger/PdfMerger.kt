@@ -72,8 +72,8 @@ class PdfMerger : MeterBinder {
         mergeinfo.gjelderID
         val merger = AdvancedPdfMerger(mergeinfo)
         val mergedDocument = merger.generatePdfResponse()
-
-        mergedDocumentSize.record(mergedDocument.size.toDouble()) // TODO: bør måle størrelse på innkommende?
+        // TODO: bør måle størrelse på innkommende også?
+        mergedDocumentSize.record(mergedDocument.size.toDouble())
 
         return mergedDocument
     }
