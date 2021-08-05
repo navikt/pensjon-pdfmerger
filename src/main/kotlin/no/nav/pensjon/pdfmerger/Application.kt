@@ -92,8 +92,8 @@ fun Application.main() {
                             info.add(part.value)
                         }
                         is PartData.BinaryItem -> {
-                        // TODO: ignorere eller kaste exception?
-                         }
+                            // TODO: ignorere eller kaste exception?
+                        }
                     }
                 }
                 call.respondBytes(
