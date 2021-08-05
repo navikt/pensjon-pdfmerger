@@ -12,7 +12,7 @@ fun mapRequestToDomainAndValidate(
 ): MergeInfo {
     return MergeInfo(
         info.gjelderID,
-        info.gjelderName,
+        info.gjelderNavn,
         mapDocumentsinfoRequestToDomainAndValidate(info, documents)
     )
 }
@@ -20,25 +20,25 @@ fun mapRequestToDomainAndValidate(
 fun mapDocumentsinfoRequestToDomainAndValidate(
     info: MergeInfoRequest,
     documents: MutableMap<String, ByteArray>
-): List<Documentinfo> {
-    val documentinfo = mutableListOf<Documentinfo>()
-    info.documentinfo.forEach {
+): List<Dokumentinfo> {
+    val documentinfo = mutableListOf<Dokumentinfo>()
+    info.dokumentinfo.forEach {
         documentinfo.add(
-            Documentinfo(
-                it.filename,
+            Dokumentinfo(
+                it.filnavn,
                 it.dokumenttype,
                 it.fagomrade,
                 it.saknr,
                 it.avsenderMottaker,
-                it.documentName,
+                it.dokumentnavn,
                 mapStringToDate(it.mottattSendtDato),
-                findFile(it.filename, documents),
-                mapVedleggListRequestToDomainAndValidate(it.vedleggList, documents)
+                findFile(it.filnavn, documents),
+                mapVedleggListRequestToDomainAndValidate(it.vedleggListe, documents)
             )
         )
     }
 
-    documentinfo.sortWith(Comparator.comparing(Documentinfo::mottattSendtDato))
+    documentinfo.sortWith(Comparator.comparing(Dokumentinfo::mottattSendtDato))
     return documentinfo.toList()
 }
 
@@ -50,9 +50,9 @@ fun mapVedleggListRequestToDomainAndValidate(
     vedleggListRequest?.forEach {
         vedlegglist.add(
             VedleggDokument(
-                it.filename,
-                it.documentName,
-                findFile(it.filename, documents)
+                it.filnavn,
+                it.dokumentnavn,
+                findFile(it.filnavn, documents)
             )
         )
     }
