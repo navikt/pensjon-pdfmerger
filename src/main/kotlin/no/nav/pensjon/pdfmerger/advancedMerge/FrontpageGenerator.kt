@@ -7,12 +7,12 @@ import no.nav.pensjon.pdfmerger.Dokumentinfo
 import java.time.format.DateTimeFormatter
 
 val EMPTY_PARAGRAPH = Paragraph(" ")
-val HEADING_FONT: Font = Font(Font.TIMES_ROMAN, 24f, Font.BOLD)
 val SPACING = 50
 val INFO_FONT_BOLD: Font = Font(Font.TIMES_ROMAN, 18f, Font.BOLD)
-val NORMAL_FONT: Font = Font(Font.TIMES_ROMAN, 11f, Font.NORMAL)
 
 class FrontpageGenerator {
+    private val HEADING_FONT: Font = Font(Font.TIMES_ROMAN, 24f, Font.BOLD)
+    private val NORMAL_FONT: Font = Font(Font.TIMES_ROMAN, 11f, Font.NORMAL)
 
     init {
         EMPTY_PARAGRAPH.setSpacingAfter(SPACING.toFloat())
