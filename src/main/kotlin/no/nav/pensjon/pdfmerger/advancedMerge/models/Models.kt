@@ -13,11 +13,11 @@ data class Dokumentinfo(
     val dokumenttype: String,
     val fagomrade: String,
     val saknr: String,
-    val avsenderMottaker: String,
+    val avsenderMottaker: String? = "",
     val dokumentnavn: String,
     val mottattSendtDato: LocalDate,
-    val fil: ByteArray,
-    val vedleggListe: List<VedleggDokument>
+    val vedleggListe: List<VedleggDokument>,
+    val fil: ByteArray
 )
 
 data class VedleggDokument(

@@ -32,8 +32,8 @@ fun mapDocumentsinfoRequestToDomainAndValidate(
                 it.avsenderMottaker,
                 it.dokumentnavn,
                 mapStringToDate(it.mottattSendtDato),
-                findFile(it.filnavn, documents),
-                mapVedleggListRequestToDomainAndValidate(it.vedleggListe, documents)
+                mapVedleggListRequestToDomainAndValidate(it.vedleggListe, documents),
+                findFile(it.filnavn, documents)
             )
         )
     }
@@ -68,5 +68,5 @@ fun findFile(filename: String, documents: MutableMap<String, ByteArray>): ByteAr
 }
 
 fun mapStringToDate(mottattSendtDato: String): LocalDate {
-    return LocalDate.parse(mottattSendtDato, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    return LocalDate.parse(mottattSendtDato, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 }
