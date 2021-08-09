@@ -4,8 +4,6 @@ import com.lowagie.text.Document
 import com.lowagie.text.Paragraph
 import no.nav.pensjon.pdfmerger.Dokumentinfo
 
-val PAGE_MARGIN = 10.0f
-
 class SeparatorpageGenerator(private val document: Document) {
 
     fun createSeparatorPage(

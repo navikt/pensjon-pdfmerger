@@ -61,9 +61,7 @@ fun mapVedleggListRequestToDomainAndValidate(
 
 fun findFile(filename: String, documents: MutableMap<String, ByteArray>): ByteArray {
     val file = documents.get(filename)
-    if (file == null) {
-        throw BadRequestException("Missing file that is present in request $filename")
-    }
+        ?: throw BadRequestException("Missing file that is present in request $filename")
     return file
 }
 
