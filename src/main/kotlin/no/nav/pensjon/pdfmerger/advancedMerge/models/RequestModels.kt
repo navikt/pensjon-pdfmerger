@@ -11,7 +11,7 @@ data class DokumentinfoRequest(
     val dokumenttype: String,
     val fagomrade: String,
     val saknr: String,
-    val avsenderMottaker: String,
+    val avsenderMottaker: String?,
     val dokumentnavn: String,
     val mottattSendtDato: String,
     val vedleggListe: List<VedleggDokumentRequest>?
