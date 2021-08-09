@@ -69,7 +69,6 @@ class PdfMerger : MeterBinder {
         mergeinfo: MergeInfo,
     ): ByteArray {
 
-        mergeinfo.gjelderID
         val merger = AdvancedPdfMerger(mergeinfo)
         val mergedDocument = merger.generatePdfResponse()
         // TODO: bør måle størrelse på innkommende også?
