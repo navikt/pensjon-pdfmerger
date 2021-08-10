@@ -3,7 +3,7 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 import com.lowagie.text.*
 import com.lowagie.text.pdf.PdfPCell
 import com.lowagie.text.pdf.PdfPTable
-import no.nav.pensjon.pdfmerger.Dokumentinfo
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import java.time.format.DateTimeFormatter
 
 val SPACING = 50
@@ -84,7 +84,7 @@ private fun createContentsTable(dokumentinfo: List<Dokumentinfo>): PdfPTable {
             addCell(Phrase(" ", NORMAL_FONT))
         }
 
-        documentinfo.vedleggListe.forEach { vedlegg ->
+        documentinfo.vedleggListe?.forEach { vedlegg ->
             addEmptyCells(contentsTable, 7)
             contentsTable.addCell(Phrase(vedlegg.dokumentnavn, NORMAL_FONT))
         }

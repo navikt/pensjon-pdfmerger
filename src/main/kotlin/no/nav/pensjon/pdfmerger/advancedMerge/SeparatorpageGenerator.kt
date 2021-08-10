@@ -2,7 +2,7 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 
 import com.lowagie.text.Document
 import com.lowagie.text.Paragraph
-import no.nav.pensjon.pdfmerger.Dokumentinfo
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 
 class SeparatorpageGenerator(private val document: Document) {
 
@@ -40,7 +40,7 @@ class SeparatorpageGenerator(private val document: Document) {
     }
 
     private fun addVedlegginfoToDocument(documentinfo: Dokumentinfo) {
-        if (!documentinfo.vedleggListe.isEmpty()) {
+        if (documentinfo.vedleggListe?.isNotEmpty() == true) {
             val spacer = Paragraph(" ")
             spacer.setSpacingAfter((SPACING / 2).toFloat())
             document.add(spacer)
