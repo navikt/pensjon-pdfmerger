@@ -9,12 +9,12 @@ data class MergeInfo(
 )
 
 data class Dokumentinfo(
-    val filnavn: String,
+    val filnavn: String?,
     val dokumenttype: String,
     val fagomrade: String,
     val saknr: String,
     val avsenderMottaker: String?,
-    val dokumentnavn: String,
+    val dokumentnavn: String?,
     val mottattSendtDato: LocalDate,
     val vedleggListe: List<VedleggDokument>?,
 )

@@ -11,15 +11,19 @@ data class MergeRequest(
     val gjelderID: String = mergeinfo.gjelderID
     val gjelderNavn: String = mergeinfo.gjelderNavn
     val dokumentinfo: List<Dokumentinfo> = mergeinfo.dokumentinfo
+    val totalDocs: Int = dokumentinfo.size
 
-    fun findFileIfGiven(filnavn: String): ByteArray? {
-        if (filnavn.isEmpty()) {
-            return null
+    fun findFiles(documentinfo: Dokumentinfo) = listOfNotNull(
+        documentinfo.filnavn?.let {
+            listOf(findFile(it))
+        },
+
+        documentinfo.vedleggListe?.map {
+            findFile(it.filnavn)
         }
-        return findFile(filnavn)
-    }
+    ).flatten()
 
-    fun findFile(filename: String): ByteArray {
+    private fun findFile(filename: String): ByteArray {
         return documents[filename]
             ?: throw BadRequestException("Missing file that is present in request $filename")
     }
