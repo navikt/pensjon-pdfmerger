@@ -223,8 +223,9 @@ class ApplicationTest {
                 assertTrue {
                     metric("mergeWithSeparator_merged_document_size_bytes_sum").toInt() > 0
                 }
-                assertEquals (
-                    expected = documentA.size + documentB.size + documentVedleggA.size + documentVedleggB.size,
+                assertEquals(
+                    expected = documentA.size + documentB.size + documentVedleggA.size +
+                        documentVedleggB.size,
                     actual = metric("mergeWithSeparator_document_size_bytes_sum").toInt()
                 )
                 assertEquals(
