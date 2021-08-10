@@ -6,24 +6,24 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Comparator
 
-fun mapRequestToDomainAndValidate(
+fun mapRequestToDomain(
     info: MergeInfoRequest,
     documents: MutableMap<String, ByteArray>
 ): MergeInfo {
     return MergeInfo(
         info.gjelderID,
         info.gjelderNavn,
-        mapDocumentsinfoRequestToDomainAndValidate(info, documents)
+        mapDokumentinfoRequestToDomain(info.dokumentinfo, documents)
     )
 }
 
-fun mapDocumentsinfoRequestToDomainAndValidate(
-    info: MergeInfoRequest,
+fun mapDokumentinfoRequestToDomain(
+    dokumentinfoRequest: List<DokumentinfoRequest>,
     documents: MutableMap<String, ByteArray>
 ): List<Dokumentinfo> {
-    val documentinfo = mutableListOf<Dokumentinfo>()
-    info.dokumentinfo.forEach {
-        documentinfo.add(
+    val dokumentinfo = mutableListOf<Dokumentinfo>()
+    dokumentinfoRequest.forEach {
+        dokumentinfo.add(
             Dokumentinfo(
                 it.filnavn,
                 it.dokumenttype,
@@ -32,14 +32,14 @@ fun mapDocumentsinfoRequestToDomainAndValidate(
                 it.avsenderMottaker,
                 it.dokumentnavn,
                 mapStringToDate(it.mottattSendtDato),
-                mapVedleggListRequestToDomainAndValidate(it.vedleggListe, documents),
+                mapVedleggListRequestToDomain(it.vedleggListe, documents),
                 findFileIfGiven(it.filnavn, documents)
             )
         )
     }
 
-    documentinfo.sortWith(Comparator.comparing(Dokumentinfo::mottattSendtDato))
-    return documentinfo.toList()
+    dokumentinfo.sortWith(Comparator.comparing(Dokumentinfo::mottattSendtDato))
+    return dokumentinfo.toList()
 }
 
 fun findFileIfGiven(filnavn: String, documents: MutableMap<String, ByteArray>): ByteArray? {
@@ -49,7 +49,7 @@ fun findFileIfGiven(filnavn: String, documents: MutableMap<String, ByteArray>): 
     return findFile(filnavn, documents)
 }
 
-fun mapVedleggListRequestToDomainAndValidate(
+fun mapVedleggListRequestToDomain(
     vedleggListRequest: List<VedleggDokumentRequest>?,
     documents: MutableMap<String, ByteArray>
 ): List<VedleggDokument> {
