@@ -1,0 +1,24 @@
+{
+  "dokumentinfo": [
+    {
+      "filnavn": "a.pdf",
+      "dokumenttype": "I",
+      "fagomrade": "Uføre",
+      "saknr": "2000",
+      "avsenderMottaker": "Ingen oppgitt",
+      "dokumentnavn": "Innhold av hoveddok",
+      "mottattSendtDato": "03-08-2021"
+    },
+    {
+      "filnavn": "not_a_pdf",
+      "dokumenttype": "U",
+      "fagomrade": "Uføre",
+      "saknr": "2000",
+      "avsenderMottaker": "Ingen oppgitt",
+      "dokumentnavn": "Innhold av hoveddok 2",
+      "mottattSendtDato": "04-08-2021"
+    }
+  ],
+  "gjelderNavn": "Mitt Navn",
+  "gjelderID": "0101202012345"
+}

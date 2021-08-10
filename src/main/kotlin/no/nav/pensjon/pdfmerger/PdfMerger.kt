@@ -14,12 +14,15 @@ import java.io.ByteArrayOutputStream
 
 class PdfMerger : MeterBinder {
     private lateinit var mergeCallCount: Counter
-    private lateinit var mergeWithSeparatorCallCount: Counter
     private lateinit var documentCount: DistributionSummary
     private lateinit var documentSize: DistributionSummary
     private lateinit var mergedDocumentSize: DistributionSummary
-
     private lateinit var mergeTimer: Timer
+
+    private lateinit var mergeWithSeparatorCallCount: Counter
+    private lateinit var mergeWithSeparatorDocumentCount: DistributionSummary
+    private lateinit var mergeWithSeparatorDocumentSize: DistributionSummary
+    private lateinit var mergeWithSeparatorMergedDocumentSize: DistributionSummary
     private lateinit var mergeWithSeparatorTimer: Timer
 
     fun mergeDocuments(documents: List<ByteArray>): ByteArray {
@@ -54,6 +57,10 @@ class PdfMerger : MeterBinder {
         mergeWithSeparatorCallCount.increment()
 
         return mergeWithSeparatorTimer.recordCallable {
+            mergeWithSeparatorDocumentCount.record(documents.size.toDouble())
+            documents.forEach {
+                mergeWithSeparatorDocumentSize.record(it.value.size.toDouble())
+            }
             val mapper = jacksonObjectMapper()
             val mergeInfoRequest: MergeInfoRequest =
                 mapper.readValue(info.get(0), MergeInfoRequest::class.java)
@@ -61,20 +68,12 @@ class PdfMerger : MeterBinder {
             val mergeinfo: MergeInfo =
                 mapRequestToDomainAndValidate(mergeInfoRequest, documents)
 
-            mergeWithSeparator(mergeinfo)
+            val merger = AdvancedPdfMerger(mergeinfo)
+            val mergedDocument = merger.generatePdfResponse()
+            mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
+
+            mergedDocument
         }
-    }
-
-    fun mergeWithSeparator(
-        mergeinfo: MergeInfo,
-    ): ByteArray {
-
-        val merger = AdvancedPdfMerger(mergeinfo)
-        val mergedDocument = merger.generatePdfResponse()
-        // TODO: bør måle størrelse på innkommende også?
-        mergedDocumentSize.record(mergedDocument.size.toDouble())
-
-        return mergedDocument
     }
 
     override fun bindTo(meterRegistry: MeterRegistry) {
@@ -104,8 +103,29 @@ class PdfMerger : MeterBinder {
             .description("Time of merge operation")
             .register(meterRegistry)
 
+        mergeWithSeparatorDocumentCount = DistributionSummary
+            .builder("mergeWithSeparator.document.count")
+            .description("Number of documents to merge with mergeWithSeparator per call")
+            .publishPercentiles(0.1, 0.25, 0.5, 0.75, 0.9)
+            .baseUnit(BaseUnits.FILES)
+            .register(meterRegistry)
+
+        mergeWithSeparatorDocumentSize = DistributionSummary
+            .builder("mergeWithSeparator.document.size")
+            .baseUnit(BaseUnits.BYTES)
+            .publishPercentiles(0.1, 0.25, 0.5, 0.75, 0.9)
+            .description("Size of documents to merge with mergeWithSeparator")
+            .register(meterRegistry)
+
+        mergeWithSeparatorMergedDocumentSize = DistributionSummary
+            .builder("mergeWithSeparator.merged.document.size")
+            .baseUnit(BaseUnits.BYTES)
+            .publishPercentiles(0.1, 0.25, 0.5, 0.75, 0.9)
+            .description("Size of merged document through mergeWithSeparator")
+            .register(meterRegistry)
+
         mergeWithSeparatorCallCount = Counter.builder("merger.mergeWithSeparatorCall.count")
-            .baseUnit("calls")
+            .baseUnit("calls to mergeWithSeparator")
             .register(meterRegistry)
 
         mergeWithSeparatorTimer = Timer.builder("merger.mergeWithSeparator.timer")
