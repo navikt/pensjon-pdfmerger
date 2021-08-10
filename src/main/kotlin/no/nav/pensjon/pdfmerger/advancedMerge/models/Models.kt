@@ -1,5 +1,6 @@
 package no.nav.pensjon.pdfmerger
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDate
 
 data class MergeInfo(
@@ -17,11 +18,13 @@ data class Dokumentinfo(
     val dokumentnavn: String,
     val mottattSendtDato: LocalDate,
     val vedleggListe: List<VedleggDokument>,
+    @JsonIgnore
     val fil: ByteArray?
 )
 
 data class VedleggDokument(
     val filnavn: String,
     val dokumentnavn: String,
+    @JsonIgnore
     val fil: ByteArray
 )

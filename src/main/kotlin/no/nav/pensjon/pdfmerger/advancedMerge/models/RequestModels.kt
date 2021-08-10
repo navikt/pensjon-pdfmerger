@@ -1,5 +1,7 @@
 package no.nav.pensjon.pdfmerger
 
+import java.time.LocalDate
+
 data class MergeInfoRequest(
     val gjelderID: String,
     val gjelderNavn: String,
@@ -13,7 +15,7 @@ data class DokumentinfoRequest(
     val saknr: String,
     val avsenderMottaker: String?,
     val dokumentnavn: String,
-    val mottattSendtDato: String,
+    val mottattSendtDato: LocalDate,
     val vedleggListe: List<VedleggDokumentRequest>?
 )
 

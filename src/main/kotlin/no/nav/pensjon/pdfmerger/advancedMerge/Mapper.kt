@@ -31,7 +31,7 @@ fun mapDokumentinfoRequestToDomain(
                 it.saknr,
                 it.avsenderMottaker,
                 it.dokumentnavn,
-                mapStringToDate(it.mottattSendtDato),
+                it.mottattSendtDato,
                 mapVedleggListRequestToDomain(it.vedleggListe, documents),
                 findFileIfGiven(it.filnavn, documents)
             )
@@ -70,8 +70,4 @@ fun findFile(filename: String, documents: MutableMap<String, ByteArray>): ByteAr
     val file = documents.get(filename)
         ?: throw BadRequestException("Missing file that is present in request $filename")
     return file
-}
-
-fun mapStringToDate(mottattSendtDato: String): LocalDate {
-    return LocalDate.parse(mottattSendtDato, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 }

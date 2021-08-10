@@ -1,5 +1,7 @@
 package no.nav.pensjon.pdfmerger
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -16,6 +18,7 @@ import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig.DEFAULT
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomain
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 import org.slf4j.event.Level
@@ -24,6 +27,7 @@ val logger: Logger = getLogger(Application::class.java)
 
 fun Application.main() {
     val pdfMerger = PdfMerger()
+    val mapper = jacksonObjectMapper()
     val appMicrometerRegistry = PrometheusMeterRegistry(DEFAULT)
 
     install(MicrometerMetrics) {
@@ -77,25 +81,34 @@ fun Application.main() {
 
         post("/mergeWithSeparator") {
             try {
-
+                var info: MergeInfo? = null
                 val documents: MutableMap<String, ByteArray> = mutableMapOf()
-                val info: MutableList<String> = mutableListOf()
 
                 val multipartData = call.receiveMultipart()
                 multipartData.forEachPart { part ->
                     when (part) {
                         is PartData.FileItem -> {
                             val filename = part.originalFileName as String
-                            documents.put(filename, part.streamProvider().readBytes())
+                            if (documents.containsKey(filename)) {
+                                throw IllegalArgumentException("Must have unique file name for documents")
+                            }
+                            documents[filename] = part.streamProvider().readBytes()
                         }
                         is PartData.FormItem -> {
-                            info.add(part.value)
+                            if (info != null) {
+                                throw IllegalArgumentException("Must only send one FormItem with MergeInfo")
+                            }
+
+                            info = mapRequestToDomain(mapper.readValue(part.value), documents)
                         }
-                        else -> {}
+                        else -> {
+                            logger.warn("Don't know how to handle part of type ${part::class}}")
+                        }
                     }
                 }
+
                 call.respondBytes(
-                    bytes = pdfMerger.mergeWithSeparator(info, documents),
+                    bytes = pdfMerger.mergeWithSeparator(requireNotNull(info) { "Missing merge info FormItem" }, documents),
                     contentType = Pdf
                 )
             } catch (e: Exception) {
