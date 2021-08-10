@@ -33,13 +33,20 @@ fun mapDocumentsinfoRequestToDomainAndValidate(
                 it.dokumentnavn,
                 mapStringToDate(it.mottattSendtDato),
                 mapVedleggListRequestToDomainAndValidate(it.vedleggListe, documents),
-                findFile(it.filnavn, documents)
+                findFileIfGiven(it.filnavn, documents)
             )
         )
     }
 
     documentinfo.sortWith(Comparator.comparing(Dokumentinfo::mottattSendtDato))
     return documentinfo.toList()
+}
+
+fun findFileIfGiven(filnavn: String, documents: MutableMap<String, ByteArray>): ByteArray? {
+    if (filnavn.isEmpty()) {
+        return null
+    }
+    return findFile(filnavn, documents)
 }
 
 fun mapVedleggListRequestToDomainAndValidate(

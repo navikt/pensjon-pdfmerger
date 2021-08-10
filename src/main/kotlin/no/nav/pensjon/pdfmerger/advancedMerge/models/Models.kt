@@ -17,7 +17,7 @@ data class Dokumentinfo(
     val dokumentnavn: String,
     val mottattSendtDato: LocalDate,
     val vedleggListe: List<VedleggDokument>,
-    val fil: ByteArray
+    val fil: ByteArray?
 )
 
 data class VedleggDokument(

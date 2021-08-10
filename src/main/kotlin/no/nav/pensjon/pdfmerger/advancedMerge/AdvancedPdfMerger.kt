@@ -66,10 +66,13 @@ class AdvancedPdfMerger(
         }
     }
 
+    // If no hoveddokument is given we still need to add its vedlegg
     fun appendDocumentWithVedlegg(documentinfo: Dokumentinfo) {
         val files: MutableList<ByteArray> = ArrayList()
 
-        files.add(documentinfo.fil)
+        if (documentinfo.fil != null) {
+            files.add(documentinfo.fil)
+        }
         documentinfo.vedleggListe.forEach { files.add(it.fil) }
 
         for (file in files) {
