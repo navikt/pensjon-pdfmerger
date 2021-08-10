@@ -3,15 +3,13 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 import com.lowagie.text.*
 import com.lowagie.text.pdf.*
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
-import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import java.io.ByteArrayOutputStream
 
 val EMPTY_PARAGRAPH = Paragraph(" ")
 val PAGE_MARGIN = 10.0f
 
 class AdvancedPdfMerger(
-    val mergeinfo: MergeInfo,
-    val documents: MutableMap<String, ByteArray>
+    val mergeRequest: MergeRequest
 ) {
 
     private val document: Document
@@ -46,18 +44,18 @@ class AdvancedPdfMerger(
 
         createFrontPage(
             document,
-            mergeinfo.gjelderID,
-            mergeinfo.gjelderNavn,
-            mergeinfo.dokumentinfo
+            mergeRequest.gjelderID,
+            mergeRequest.gjelderNavn,
+            mergeRequest.dokumentinfo
         )
 
         var i = 1
-        for (documentinfo in mergeinfo.dokumentinfo) {
+        for (documentinfo in mergeRequest.dokumentinfo) {
             separatorpageGenerator.createSeparatorPage(
                 i++,
-                mergeinfo.dokumentinfo.size,
+                mergeRequest.dokumentinfo.size,
                 documentinfo,
-                mergeinfo.gjelderNavn
+                mergeRequest.gjelderNavn
             )
             appendDocumentWithVedlegg(documentinfo)
         }
@@ -68,15 +66,15 @@ class AdvancedPdfMerger(
     }
 
     // If no hoveddokument is given we still need to add its vedlegg
-    fun appendDocumentWithVedlegg(documentinfo: Dokumentinfo,) {
+    fun appendDocumentWithVedlegg(documentinfo: Dokumentinfo) {
         val files: MutableList<ByteArray> = ArrayList()
 
-        findFileIfGiven(documentinfo.filnavn, documents)
+        mergeRequest.findFileIfGiven(documentinfo.filnavn)
             ?.let {
                 files.add(it)
             }
 
-        documentinfo.vedleggListe?.forEach { files.add(findFile(it.filnavn, documents)) }
+        documentinfo.vedleggListe?.forEach { files.add(mergeRequest.findFile(it.filnavn)) }
 
         for (file in files) {
             document.setMargins(0f, 0f, -14f, 0f)
