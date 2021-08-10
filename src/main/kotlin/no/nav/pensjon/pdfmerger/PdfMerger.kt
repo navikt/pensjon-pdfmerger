@@ -62,8 +62,8 @@ class PdfMerger : MeterBinder {
                 mergeWithSeparatorDocumentSize.record(it.value.size.toDouble())
             }
 
-            val merger = AdvancedPdfMerger(MergeRequest(mergeinfo, documents))
-            val mergedDocument = merger.generatePdfResponse()
+            val merger = AdvancedPdfMerger()
+            val mergedDocument = merger.merge(MergeRequest(mergeinfo, documents))
             mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument
