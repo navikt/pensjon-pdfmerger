@@ -8,7 +8,7 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.core.instrument.binder.BaseUnits
 import io.micrometer.core.instrument.binder.MeterBinder
 import no.nav.pensjon.pdfmerger.advancedMerge.AdvancedPdfMerger
-import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomainAndValidate
+import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomain
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
 
@@ -66,7 +66,7 @@ class PdfMerger : MeterBinder {
                 mapper.readValue(info.get(0), MergeInfoRequest::class.java)
 
             val mergeinfo: MergeInfo =
-                mapRequestToDomainAndValidate(mergeInfoRequest, documents)
+                mapRequestToDomain(mergeInfoRequest, documents)
 
             val merger = AdvancedPdfMerger(mergeinfo)
             val mergedDocument = merger.generatePdfResponse()
