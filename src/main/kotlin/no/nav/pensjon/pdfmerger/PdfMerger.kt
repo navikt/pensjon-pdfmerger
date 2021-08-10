@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.core.instrument.binder.BaseUnits
 import io.micrometer.core.instrument.binder.MeterBinder
 import no.nav.pensjon.pdfmerger.advancedMerge.AdvancedPdfMerger
+import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
 
@@ -60,7 +61,7 @@ class PdfMerger : MeterBinder {
                 mergeWithSeparatorDocumentSize.record(it.value.size.toDouble())
             }
 
-            val merger = AdvancedPdfMerger(mergeinfo)
+            val merger = AdvancedPdfMerger(mergeinfo, documents)
             val mergedDocument = merger.generatePdfResponse()
             mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
 

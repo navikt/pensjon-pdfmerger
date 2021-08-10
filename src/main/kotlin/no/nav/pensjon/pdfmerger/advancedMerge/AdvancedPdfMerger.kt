@@ -2,15 +2,16 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 
 import com.lowagie.text.*
 import com.lowagie.text.pdf.*
-import no.nav.pensjon.pdfmerger.Dokumentinfo
-import no.nav.pensjon.pdfmerger.MergeInfo
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
+import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import java.io.ByteArrayOutputStream
 
 val EMPTY_PARAGRAPH = Paragraph(" ")
 val PAGE_MARGIN = 10.0f
 
 class AdvancedPdfMerger(
-    val mergeinfo: MergeInfo
+    val mergeinfo: MergeInfo,
+    val documents: MutableMap<String, ByteArray>
 ) {
 
     private val document: Document
@@ -67,13 +68,15 @@ class AdvancedPdfMerger(
     }
 
     // If no hoveddokument is given we still need to add its vedlegg
-    fun appendDocumentWithVedlegg(documentinfo: Dokumentinfo) {
+    fun appendDocumentWithVedlegg(documentinfo: Dokumentinfo,) {
         val files: MutableList<ByteArray> = ArrayList()
 
-        if (documentinfo.fil != null) {
-            files.add(documentinfo.fil)
-        }
-        documentinfo.vedleggListe.forEach { files.add(it.fil) }
+        findFileIfGiven(documentinfo.filnavn, documents)
+            ?.let {
+                files.add(it)
+            }
+
+        documentinfo.vedleggListe?.forEach { files.add(findFile(it.filnavn, documents)) }
 
         for (file in files) {
             document.setMargins(0f, 0f, -14f, 0f)

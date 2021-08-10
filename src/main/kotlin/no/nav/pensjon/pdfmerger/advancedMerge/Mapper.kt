@@ -1,39 +1,34 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
 import io.ktor.features.*
-import no.nav.pensjon.pdfmerger.*
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import no.nav.pensjon.pdfmerger.advancedMerge.models.*
 import java.util.Comparator
 
 fun mapRequestToDomain(
-    info: MergeInfoRequest,
-    documents: MutableMap<String, ByteArray>
+    info: MergeInfoRequest
 ): MergeInfo {
     return MergeInfo(
         info.gjelderID,
         info.gjelderNavn,
-        mapDokumentinfoRequestToDomain(info.dokumentinfo, documents)
+        mapDokumentinfoRequestToDomain(info.dokumentinfo)
     )
 }
 
 fun mapDokumentinfoRequestToDomain(
-    dokumentinfoRequest: List<DokumentinfoRequest>,
-    documents: MutableMap<String, ByteArray>
+    dokumentinfoRequest: List<DokumentinfoRequest>
 ): List<Dokumentinfo> {
     val dokumentinfo = mutableListOf<Dokumentinfo>()
     dokumentinfoRequest.forEach {
         dokumentinfo.add(
             Dokumentinfo(
-                it.filnavn,
-                it.dokumenttype,
-                it.fagomrade,
-                it.saknr,
-                it.avsenderMottaker,
-                it.dokumentnavn,
-                it.mottattSendtDato,
-                mapVedleggListRequestToDomain(it.vedleggListe, documents),
-                findFileIfGiven(it.filnavn, documents)
+                filnavn = it.filnavn,
+                dokumenttype = it.dokumenttype,
+                fagomrade = it.fagomrade,
+                saknr = it.saknr,
+                avsenderMottaker = it.avsenderMottaker,
+                dokumentnavn = it.dokumentnavn,
+                mottattSendtDato = it.mottattSendtDato,
+                vedleggListe = mapVedleggListRequestToDomain(it.vedleggListe)
             )
         )
     }
@@ -42,28 +37,26 @@ fun mapDokumentinfoRequestToDomain(
     return dokumentinfo.toList()
 }
 
-fun findFileIfGiven(filnavn: String, documents: MutableMap<String, ByteArray>): ByteArray? {
-    if (filnavn.isEmpty()) {
-        return null
-    }
-    return findFile(filnavn, documents)
-}
-
 fun mapVedleggListRequestToDomain(
-    vedleggListRequest: List<VedleggDokumentRequest>?,
-    documents: MutableMap<String, ByteArray>
+    vedleggListRequest: List<VedleggDokumentRequest>?
 ): List<VedleggDokument> {
     val vedlegglist = mutableListOf<VedleggDokument>()
     vedleggListRequest?.forEach {
         vedlegglist.add(
             VedleggDokument(
                 it.filnavn,
-                it.dokumentnavn,
-                findFile(it.filnavn, documents)
+                it.dokumentnavn
             )
         )
     }
     return vedlegglist.toList()
+}
+
+fun findFileIfGiven(filnavn: String, documents: MutableMap<String, ByteArray>): ByteArray? {
+    if (filnavn.isEmpty()) {
+        return null
+    }
+    return findFile(filnavn, documents)
 }
 
 fun findFile(filename: String, documents: MutableMap<String, ByteArray>): ByteArray {

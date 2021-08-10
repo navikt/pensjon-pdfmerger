@@ -1,4 +1,4 @@
-package no.nav.pensjon.pdfmerger
+package no.nav.pensjon.pdfmerger.advancedMerge.models
 
 import java.time.LocalDate
 
@@ -21,5 +21,5 @@ data class DokumentinfoRequest(
 
 data class VedleggDokumentRequest(
     val filnavn: String,
-    val dokumentnavn: String
+    val dokumentnavn: String,
 )
