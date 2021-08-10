@@ -124,8 +124,8 @@ class PdfMerger : MeterBinder {
             .description("Size of merged document through mergeWithSeparator")
             .register(meterRegistry)
 
-        mergeWithSeparatorCallCount = Counter.builder("merger.mergeWithSeparatorCall.count")
-            .baseUnit("calls to mergeWithSeparator")
+        mergeWithSeparatorCallCount = Counter.builder("mergeWithSeparator.call.count")
+            .baseUnit("calls")
             .register(meterRegistry)
 
         mergeWithSeparatorTimer = Timer.builder("merger.mergeWithSeparator.timer")
