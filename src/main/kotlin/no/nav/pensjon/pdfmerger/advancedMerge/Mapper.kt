@@ -1,6 +1,5 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
-import io.ktor.features.*
 import no.nav.pensjon.pdfmerger.advancedMerge.models.*
 import java.util.Comparator
 
@@ -50,17 +49,4 @@ fun mapVedleggListRequestToDomain(
         )
     }
     return vedlegglist.toList()
-}
-
-fun findFileIfGiven(filnavn: String, documents: MutableMap<String, ByteArray>): ByteArray? {
-    if (filnavn.isEmpty()) {
-        return null
-    }
-    return findFile(filnavn, documents)
-}
-
-fun findFile(filename: String, documents: MutableMap<String, ByteArray>): ByteArray {
-    val file = documents.get(filename)
-        ?: throw BadRequestException("Missing file that is present in request $filename")
-    return file
 }
