@@ -22,7 +22,7 @@ class SeparatorpageGenerator {
     }
 
     private fun createDocInfoLine(docNum: Int, totalDocs: Int, docinfo: Dokumentinfo): Paragraph {
-        val innhold = if (docinfo.dokumentnavn.isEmpty()) "" else ": " + docinfo.dokumentnavn
+        val innhold = if (docinfo.dokumentnavn == null) "" else ": " + docinfo.dokumentnavn
         return createCenterInfoParagraph(
             "Dokument nr $docNum av $totalDocs$innhold"
         )
