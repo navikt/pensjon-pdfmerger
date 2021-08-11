@@ -1,7 +1,12 @@
 package no.nav.pensjon.pdfmerger
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.features.*
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import org.apache.pdfbox.pdmodel.PDDocument.load
 import java.io.IOException
 import kotlin.test.Test
@@ -10,6 +15,10 @@ import kotlin.test.assertEquals
 class AdvancedPdfMergerTest {
     private val pdfMerger = PdfMerger().apply {
         bindTo(SimpleMeterRegistry())
+    }
+    private val objectMapper = jsonMapper {
+        addModule(kotlinModule())
+        addModule(JavaTimeModule())
     }
 
     private val documentA = readTestResource("/a.pdf")!!.readBytes()
@@ -106,40 +115,23 @@ class AdvancedPdfMergerTest {
         pdfMerger.mergeWithSeparator(createInfo(), mutableMapOf("a.pdf" to documentA))
     }
 
-    private fun createInfo(): MutableList<String> {
-        return mutableListOf(
-            javaClass.getResource("/mergerequest.json")!!
-                .readText(charset("UTF-8"))
-        )
-    }
+    private fun createInfo() = mergeInfoFromResource("/mergerequest.json")
 
-    private fun createInfoWithBadFile(): MutableList<String> {
-        return mutableListOf(
-            javaClass.getResource("/mergerequestWithBadFile.json")!!
-                .readText(charset("UTF-8"))
-        )
-    }
+    private fun createInfoWithBadFile() = mergeInfoFromResource("/mergerequestWithBadFile.json")
 
-    private fun createInfoWithVedlegg(): MutableList<String> {
-        return mutableListOf(
-            javaClass.getResource("/mergerequestWithVedlegg.json")!!
-                .readText(charset("UTF-8"))
-        )
-    }
+    private fun createInfoWithVedlegg() = mergeInfoFromResource("/mergerequestWithVedlegg.json")
 
-    private fun createInfoWithTwoVedlegg(): MutableList<String> {
-        return mutableListOf(
-            javaClass.getResource("/mergerequestWithTwoVedlegg.json")!!
-                .readText(charset("UTF-8"))
-        )
-    }
+    private fun createInfoWithTwoVedlegg() = mergeInfoFromResource("/mergerequestWithTwoVedlegg.json")
 
-    private fun createInfoWithTwoVedleggWithoutHoveddokument(): MutableList<String> {
-        return mutableListOf(
-            javaClass.getResource("/mergerequestTwoVedleggWithoutHoveddokument.json")!!
-                .readText(charset("UTF-8"))
-        )
-    }
+    private fun createInfoWithTwoVedleggWithoutHoveddokument() =
+        mergeInfoFromResource("/mergerequestTwoVedleggWithoutHoveddokument.json")
+
+    private fun mergeInfoFromResource(name: String): MergeInfo =
+        javaClass.getResource(name)
+            ?.run {
+                objectMapper.readValue(readText(charset("UTF-8")))
+            }
+            ?: throw RuntimeException("Could not find resource with name $name")
 
     private fun readTestResource(name: String) =
         javaClass.getResourceAsStream(name)

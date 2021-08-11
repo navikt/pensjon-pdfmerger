@@ -2,30 +2,29 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 
 import com.lowagie.text.Document
 import com.lowagie.text.Paragraph
-import no.nav.pensjon.pdfmerger.Dokumentinfo
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 
-class SeparatorpageGenerator(private val document: Document) {
-
+class SeparatorpageGenerator {
     fun createSeparatorPage(
+        mergeContext: MergeContext,
+        mergeRequest: MergeRequest,
         docNr: Int,
-        totalDocs: Int,
         dokList: Dokumentinfo,
-        gjelderNavn: String
     ) {
-        document.add(EMPTY_PARAGRAPH)
-        val heading = Paragraph(gjelderNavn, INFO_FONT_BOLD)
+        mergeContext.document.add(mergeContext.emptyParagraph)
+        val heading = Paragraph(mergeRequest.gjelderNavn, INFO_FONT_BOLD)
         heading.setSpacingAfter(SPACING.toFloat())
         heading.setAlignment(Paragraph.ALIGN_CENTER)
-        document.add(heading)
-        document.add(createDocInfoLine(docNr, totalDocs, dokList))
-        addVedlegginfoToDocument(dokList)
-        document.newPage()
+        mergeContext.document.add(heading)
+        mergeContext.document.add(createDocInfoLine(docNr, mergeRequest.totalDocs, dokList))
+        addVedlegginfoToDocument(mergeContext.document, dokList)
+        mergeContext.document.newPage()
     }
 
     private fun createDocInfoLine(docNum: Int, totalDocs: Int, docinfo: Dokumentinfo): Paragraph {
-        val innhold = if (docinfo.dokumentnavn.isEmpty()) "" else ": " + docinfo.dokumentnavn
+        val innhold = if (docinfo.dokumentnavn == null) "" else ": " + docinfo.dokumentnavn
         return createCenterInfoParagraph(
-            "Dokument nr " + docNum + " av " + totalDocs + innhold
+            "Dokument nr $docNum av $totalDocs$innhold"
         )
     }
 
@@ -39,12 +38,12 @@ class SeparatorpageGenerator(private val document: Document) {
         return paragraph
     }
 
-    private fun addVedlegginfoToDocument(documentinfo: Dokumentinfo) {
-        if (!documentinfo.vedleggListe.isEmpty()) {
+    private fun addVedlegginfoToDocument(document: Document, documentinfo: Dokumentinfo) {
+        if (documentinfo.vedleggListe?.isNotEmpty() == true) {
             val spacer = Paragraph(" ")
             spacer.setSpacingAfter((SPACING / 2).toFloat())
             document.add(spacer)
-            val paragraph = createCenterInfoParagraph("Vedlegg" + ": ")
+            val paragraph = createCenterInfoParagraph("Vedlegg: ")
             document.add(paragraph)
             for (vedlegg in documentinfo.vedleggListe) {
                 document.add(createCenterInfoParagraph(vedlegg.dokumentnavn))

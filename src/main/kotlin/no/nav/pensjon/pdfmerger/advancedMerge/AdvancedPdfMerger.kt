@@ -2,33 +2,18 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 
 import com.lowagie.text.*
 import com.lowagie.text.pdf.*
-import no.nav.pensjon.pdfmerger.Dokumentinfo
-import no.nav.pensjon.pdfmerger.MergeInfo
-import java.io.ByteArrayOutputStream
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 
-val EMPTY_PARAGRAPH = Paragraph(" ")
-val PAGE_MARGIN = 10.0f
+const val PAGE_MARGIN = 10.0f
 
 class AdvancedPdfMerger(
-    val mergeinfo: MergeInfo
+    private val frontpageGenerator: FrontpageGenerator = FrontpageGenerator(),
+    private val separatorpageGenerator: SeparatorpageGenerator = SeparatorpageGenerator()
 ) {
+    fun merge(mergeRequest: MergeRequest): ByteArray {
+        val mergeContext = createDocument(mergeRequest)
 
-    private val document: Document
-    private val byteArrayOutputStream: ByteArrayOutputStream
-    private val pdfWriter: PdfWriter
-    private val separatorpageGenerator: SeparatorpageGenerator
-
-    init {
-        document = Document()
-        byteArrayOutputStream = ByteArrayOutputStream()
-        pdfWriter = PdfWriter.getInstance(document, byteArrayOutputStream)
-        separatorpageGenerator = SeparatorpageGenerator(document)
-        EMPTY_PARAGRAPH.setSpacingAfter(SPACING.toFloat())
-    }
-
-    fun generatePdfResponse(): ByteArray {
-        createDocument()
-        return byteArrayOutputStream.toByteArray()
+        return mergeContext.byteArrayOutputStream.toByteArray()
     }
 
     /**
@@ -39,58 +24,53 @@ class AdvancedPdfMerger(
      *  the page
      *  its vedlegg
      */
-    private fun createDocument() {
-        document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
-        document.open()
+    private fun createDocument(mergeRequest: MergeRequest): MergeContext {
+        val mergeContext = MergeContext()
+        mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
+        mergeContext.document.open()
 
-        createFrontPage(
-            document,
-            mergeinfo.gjelderID,
-            mergeinfo.gjelderNavn,
-            mergeinfo.dokumentinfo
-        )
+        frontpageGenerator.createFrontPage(mergeContext, mergeRequest)
 
-        var i = 1
-        for (documentinfo in mergeinfo.dokumentinfo) {
+        mergeRequest.dokumentinfo.forEachIndexed { i, dokumentinfo ->
             separatorpageGenerator.createSeparatorPage(
-                i++,
-                mergeinfo.dokumentinfo.size,
-                documentinfo,
-                mergeinfo.gjelderNavn
+                mergeContext,
+                mergeRequest,
+                i + 1,
+                dokumentinfo,
             )
-            appendDocumentWithVedlegg(documentinfo)
+
+            appendDocumentWithAttachments(mergeContext, mergeRequest, dokumentinfo)
         }
 
-        if (document.isOpen) {
-            document.close()
+        if (mergeContext.document.isOpen) {
+            mergeContext.document.close()
         }
+
+        return mergeContext
     }
 
     // If no hoveddokument is given we still need to add its vedlegg
-    fun appendDocumentWithVedlegg(documentinfo: Dokumentinfo) {
-        val files: MutableList<ByteArray> = ArrayList()
-
-        if (documentinfo.fil != null) {
-            files.add(documentinfo.fil)
-        }
-        documentinfo.vedleggListe.forEach { files.add(it.fil) }
-
-        for (file in files) {
-            document.setMargins(0f, 0f, -14f, 0f)
+    private fun appendDocumentWithAttachments(
+        mergeContext: MergeContext,
+        mergeRequest: MergeRequest,
+        documentinfo: Dokumentinfo
+    ) {
+        mergeRequest.findFiles(documentinfo).forEach { file ->
+            mergeContext.document.setMargins(0f, 0f, -14f, 0f)
             val reader = PdfReader(file)
             var page: PdfImportedPage
             for (p in 1..reader.numberOfPages) {
-                page = pdfWriter.getImportedPage(reader, p)
+                page = mergeContext.pdfWriter.getImportedPage(reader, p)
                 val image = Image.getInstance(page)
                 image.scaleToFit(PageSize.A4.width(), PageSize.A4.height())
-                document.add(image)
+                mergeContext.document.add(image)
                 if (p < reader.numberOfPages) {
-                    document.newPage()
+                    mergeContext.document.newPage()
                 }
             }
-            document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
-            document.newPage()
-            pdfWriter.freeReader(reader)
+            mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
+            mergeContext.document.newPage()
+            mergeContext.pdfWriter.freeReader(reader)
             reader.close()
         }
     }

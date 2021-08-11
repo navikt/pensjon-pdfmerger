@@ -1,4 +1,4 @@
-package no.nav.pensjon.pdfmerger
+package no.nav.pensjon.pdfmerger.advancedMerge.models
 
 import java.time.LocalDate
 
@@ -9,19 +9,17 @@ data class MergeInfo(
 )
 
 data class Dokumentinfo(
-    val filnavn: String,
+    val filnavn: String?,
     val dokumenttype: String,
     val fagomrade: String,
     val saknr: String,
-    val avsenderMottaker: String? = "",
-    val dokumentnavn: String,
+    val avsenderMottaker: String?,
+    val dokumentnavn: String?,
     val mottattSendtDato: LocalDate,
-    val vedleggListe: List<VedleggDokument>,
-    val fil: ByteArray?
+    val vedleggListe: List<VedleggDokument>?,
 )
 
 data class VedleggDokument(
     val filnavn: String,
     val dokumentnavn: String,
-    val fil: ByteArray
 )

@@ -1,6 +1,5 @@
 package no.nav.pensjon.pdfmerger
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.MeterRegistry
@@ -8,7 +7,8 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.core.instrument.binder.BaseUnits
 import io.micrometer.core.instrument.binder.MeterBinder
 import no.nav.pensjon.pdfmerger.advancedMerge.AdvancedPdfMerger
-import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomain
+import no.nav.pensjon.pdfmerger.advancedMerge.MergeRequest
+import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
 
@@ -51,7 +51,7 @@ class PdfMerger : MeterBinder {
     }
 
     fun mergeWithSeparator(
-        info: MutableList<String>,
+        mergeinfo: MergeInfo,
         documents: MutableMap<String, ByteArray>
     ): ByteArray {
         mergeWithSeparatorCallCount.increment()
@@ -61,15 +61,9 @@ class PdfMerger : MeterBinder {
             documents.forEach {
                 mergeWithSeparatorDocumentSize.record(it.value.size.toDouble())
             }
-            val mapper = jacksonObjectMapper()
-            val mergeInfoRequest: MergeInfoRequest =
-                mapper.readValue(info.get(0), MergeInfoRequest::class.java)
 
-            val mergeinfo: MergeInfo =
-                mapRequestToDomain(mergeInfoRequest, documents)
-
-            val merger = AdvancedPdfMerger(mergeinfo)
-            val mergedDocument = merger.generatePdfResponse()
+            val merger = AdvancedPdfMerger()
+            val mergedDocument = merger.merge(MergeRequest(mergeinfo, documents))
             mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument
