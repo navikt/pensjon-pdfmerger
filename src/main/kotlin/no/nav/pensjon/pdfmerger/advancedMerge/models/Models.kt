@@ -16,7 +16,7 @@ data class Dokumentinfo(
     val avsenderMottaker: String?,
     val dokumentnavn: String?,
     val mottattSendtDato: LocalDate,
-    val vedleggListe: List<VedleggDokument>?,
+    val vedleggListe: List<VedleggDokument>,
 )
 
 data class VedleggDokument(
