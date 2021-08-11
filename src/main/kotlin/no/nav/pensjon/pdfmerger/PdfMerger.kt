@@ -57,16 +57,20 @@ class PdfMerger : MeterBinder {
         mergeWithSeparatorCallCount.increment()
 
         return mergeWithSeparatorTimer.recordCallable {
-            mergeWithSeparatorDocumentCount.record(documents.size.toDouble())
-            documents.forEach {
-                mergeWithSeparatorDocumentSize.record(it.value.size.toDouble())
-            }
+            recordDocumentsToMerge(documents)
 
             val merger = AdvancedPdfMerger()
             val mergedDocument = merger.merge(MergeRequest(mergeinfo, documents))
             mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument
+        }
+    }
+
+    private fun recordDocumentsToMerge(documents: MutableMap<String, ByteArray>) {
+        mergeWithSeparatorDocumentCount.record(documents.size.toDouble())
+        documents.forEach {
+            mergeWithSeparatorDocumentSize.record(it.value.size.toDouble())
         }
     }
 

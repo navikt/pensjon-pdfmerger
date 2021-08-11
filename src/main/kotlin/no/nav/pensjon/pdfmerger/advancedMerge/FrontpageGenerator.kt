@@ -36,7 +36,7 @@ class FrontpageGenerator {
         mergeContext.document.newPage()
     }
 
-    private fun createContentsTable(dokumentinfo: List<Dokumentinfo>): PdfPTable {
+    private fun createContentsTable(dokumentinfoListe: List<Dokumentinfo>): PdfPTable {
 
         val contentsTable = PdfPTable(8)
         val columnWidths = intArrayOf(3, 3, 4, 5, 4, 5, 5, 5)
@@ -56,44 +56,43 @@ class FrontpageGenerator {
             headerRows = 1
         }
 
-        var documentNr = 1
-        for (documentinfo in dokumentinfo) {
-            val cell = PdfPCell(Phrase(documentinfo.dokumenttype, NORMAL_FONT))
+        dokumentinfoListe.forEachIndexed { index, dokumentinfo ->
+            val cell = PdfPCell(Phrase(dokumentinfo.dokumenttype, NORMAL_FONT))
             cell.horizontalAlignment = Element.ALIGN_CENTER
 
             contentsTable.apply {
                 addCell(
                     Phrase(
-                        "" + documentNr++ + " av " + dokumentinfo.size, NORMAL_FONT
+                        "" + index+1 + " av " + dokumentinfoListe.size, NORMAL_FONT
                     )
                 )
                 addCell(cell)
                 addCell(
                     Phrase(
-                        documentinfo.mottattSendtDato.format(
+                        dokumentinfo.mottattSendtDato.format(
                             DateTimeFormatter.ofPattern(dateFormat)
                         ),
                         NORMAL_FONT
                     )
                 )
-                addCell(Phrase(documentinfo.fagomrade, NORMAL_FONT))
-                addCell(Phrase(documentinfo.saknr, NORMAL_FONT))
-                addCell(Phrase(documentinfo.avsenderMottaker, NORMAL_FONT))
-                addCell(Phrase(documentinfo.dokumentnavn, NORMAL_FONT))
+                addCell(Phrase(dokumentinfo.fagomrade, NORMAL_FONT))
+                addCell(Phrase(dokumentinfo.saknr, NORMAL_FONT))
+                addCell(Phrase(dokumentinfo.avsenderMottaker, NORMAL_FONT))
+                addCell(Phrase(dokumentinfo.dokumentnavn, NORMAL_FONT))
                 addCell(Phrase(" ", NORMAL_FONT))
             }
 
-            documentinfo.vedleggListe?.forEach { vedlegg ->
-                addEmptyCells(contentsTable, 7)
+            dokumentinfo.vedleggListe.forEach { vedlegg ->
+                addEmptyCells(contentsTable)
                 contentsTable.addCell(Phrase(vedlegg.dokumentnavn, NORMAL_FONT))
             }
         }
         return contentsTable
     }
 
-    private fun addEmptyCells(contentsTable: PdfPTable, antallTomCell: Int) {
+    private fun addEmptyCells(contentsTable: PdfPTable) {
         var index = 0
-        while (index < antallTomCell) {
+        while (index < 7) {
             contentsTable.addCell(Phrase(" ", NORMAL_FONT))
             index++
         }
