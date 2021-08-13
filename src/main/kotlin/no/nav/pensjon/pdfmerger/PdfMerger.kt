@@ -39,7 +39,7 @@ class PdfMerger : MeterBinder {
             mergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument
-        }
+        }!!
     }
 
     override fun bindTo(meterRegistry: MeterRegistry) {
