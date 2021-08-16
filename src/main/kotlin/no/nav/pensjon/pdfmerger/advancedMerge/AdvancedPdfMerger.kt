@@ -4,12 +4,14 @@ import com.lowagie.text.*
 import com.lowagie.text.pdf.*
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 
-const val PAGE_MARGIN = 10.0f
-
 class AdvancedPdfMerger(
     private val frontpageGenerator: FrontpageGenerator = FrontpageGenerator(),
-    private val separatorpageGenerator: SeparatorpageGenerator = SeparatorpageGenerator()
+    private val separatorpageGenerator: SeparatorpageGenerator = SeparatorpageGenerator(PAGE_MARGIN)
 ) {
+    companion object {
+        private val PAGE_MARGIN = 10.0f
+    }
+
     fun merge(mergeRequest: MergeRequest): ByteArray {
         val mergeContext = createDocument(mergeRequest)
 
@@ -26,7 +28,6 @@ class AdvancedPdfMerger(
      */
     private fun createDocument(mergeRequest: MergeRequest): MergeContext {
         val mergeContext = MergeContext()
-        mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
         mergeContext.document.open()
 
         frontpageGenerator.createFrontPage(mergeContext, mergeRequest)
@@ -56,7 +57,8 @@ class AdvancedPdfMerger(
         documentinfo: Dokumentinfo
     ) {
         mergeRequest.findFiles(documentinfo).forEach { file ->
-            mergeContext.document.setMargins(0f, 0f, -14f, 0f)
+            mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
+            mergeContext.document.newPage()
             val reader = PdfReader(file)
             var page: PdfImportedPage
             for (p in 1..reader.numberOfPages) {
@@ -68,8 +70,6 @@ class AdvancedPdfMerger(
                     mergeContext.document.newPage()
                 }
             }
-            mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
-            mergeContext.document.newPage()
             mergeContext.pdfWriter.freeReader(reader)
             reader.close()
         }

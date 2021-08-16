@@ -52,7 +52,7 @@ class PdfMerger : MeterBinder {
 
     fun mergeWithSeparator(
         mergeinfo: MergeInfo,
-        documents: MutableMap<String, ByteArray>
+        documents: Map<String, ByteArray>
     ): ByteArray {
         mergeWithSeparatorCallCount.increment()
 
@@ -67,7 +67,7 @@ class PdfMerger : MeterBinder {
         }
     }
 
-    private fun recordDocumentsToMerge(documents: MutableMap<String, ByteArray>) {
+    private fun recordDocumentsToMerge(documents: Map<String, ByteArray>) {
         mergeWithSeparatorDocumentCount.record(documents.size.toDouble())
         documents.forEach {
             mergeWithSeparatorDocumentSize.record(it.value.size.toDouble())

@@ -6,19 +6,19 @@ import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 
 data class MergeRequest(
     private val mergeinfo: MergeInfo,
-    private val documents: MutableMap<String, ByteArray>
+    private val documents: Map<String, ByteArray>
 ) {
     val gjelderID: String = mergeinfo.gjelderID
     val gjelderNavn: String = mergeinfo.gjelderNavn
     val dokumentinfo: List<Dokumentinfo> = mergeinfo.dokumentinfo
-    val totalDocs: Int = dokumentinfo.size
+    val totalDokumentinfo: Int = dokumentinfo.size
 
     fun findFiles(documentinfo: Dokumentinfo) = listOfNotNull(
-        documentinfo.filnavn?.let {
-            listOf(findFile(it))
+        documentinfo.hoveddokument?.let {
+            listOf(findFile(it.filnavn))
         },
 
-        documentinfo.vedleggListe?.map {
+        documentinfo.vedleggListe.map {
             findFile(it.filnavn)
         }
     ).flatten()

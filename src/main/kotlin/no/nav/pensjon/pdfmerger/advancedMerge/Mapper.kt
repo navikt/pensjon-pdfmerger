@@ -13,20 +13,19 @@ fun mapRequestToDomain(
     )
 }
 
-fun mapDokumentinfoRequestToDomain(
+private fun mapDokumentinfoRequestToDomain(
     dokumentinfoRequest: List<DokumentinfoRequest>
 ): List<Dokumentinfo> {
     val dokumentinfo = mutableListOf<Dokumentinfo>()
     dokumentinfoRequest.forEach {
         dokumentinfo.add(
             Dokumentinfo(
-                filnavn = it.filnavn,
                 dokumenttype = it.dokumenttype,
                 fagomrade = it.fagomrade,
                 saknr = it.saknr,
                 avsenderMottaker = it.avsenderMottaker,
-                dokumentnavn = it.dokumentnavn,
                 mottattSendtDato = it.mottattSendtDato,
+                hoveddokument = mapHoveddokument(it.hoveddokument),
                 vedleggListe = mapVedleggListRequestToDomain(it.vedleggListe)
             )
         )
@@ -36,13 +35,21 @@ fun mapDokumentinfoRequestToDomain(
     return dokumentinfo.toList()
 }
 
-fun mapVedleggListRequestToDomain(
-    vedleggListRequest: List<VedleggDokumentRequest>?
-): List<VedleggDokument> {
-    val vedlegglist = mutableListOf<VedleggDokument>()
+private fun mapHoveddokument(hoveddokument: DokumentRequest?): Dokument? {
+    if (hoveddokument != null) {
+        return Dokument(hoveddokument.filnavn, hoveddokument.dokumentnavn)
+    } else {
+        return null
+    }
+}
+
+private fun mapVedleggListRequestToDomain(
+    vedleggListRequest: List<DokumentRequest>?
+): List<Dokument> {
+    val vedlegglist = mutableListOf<Dokument>()
     vedleggListRequest?.forEach {
         vedlegglist.add(
-            VedleggDokument(
+            Dokument(
                 it.filnavn,
                 it.dokumentnavn
             )

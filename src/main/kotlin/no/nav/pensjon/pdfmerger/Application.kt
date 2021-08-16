@@ -97,8 +97,10 @@ fun Application.main() {
                         is PartData.FileItem -> {
                             val filename = part.originalFileName as String
                             if (documents.containsKey(filename)) {
-                                throw IllegalArgumentException("Must have unique file name for documents, " +
-                                    "file $filename appears several times")
+                                throw IllegalArgumentException(
+                                    "Must have unique file name for documents, " +
+                                        "file $filename appears several times"
+                                )
                             }
                             documents[filename] = part.streamProvider().readBytes()
                         }
@@ -119,7 +121,7 @@ fun Application.main() {
                 call.respondBytes(
                     bytes = pdfMerger.mergeWithSeparator(
                         requireNotNull(info) { "Missing merge info FormItem" },
-                        documents
+                        documents.toMap()
                     ),
                     contentType = Pdf
                 )

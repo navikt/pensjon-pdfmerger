@@ -1,138 +1,143 @@
 package no.nav.pensjon.pdfmerger
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jsonMapper
-import com.fasterxml.jackson.module.kotlin.kotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.features.*
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.pensjon.pdfmerger.advancedMerge.AdvancedPdfMerger
+import no.nav.pensjon.pdfmerger.advancedMerge.MergeRequest
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import org.apache.pdfbox.pdmodel.PDDocument.load
-import java.io.IOException
-import kotlin.test.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.io.FileNotFoundException
+import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class AdvancedPdfMergerTest {
-    private val pdfMerger = PdfMerger().apply {
-        bindTo(SimpleMeterRegistry())
-    }
-    private val objectMapper = jsonMapper {
-        addModule(kotlinModule())
-        addModule(JavaTimeModule())
-    }
+    private val pdfMerger = AdvancedPdfMerger()
 
-    private val documentA = readTestResource("/a.pdf")!!.readBytes()
-    private val documentB = readTestResource("/b.pdf")!!.readBytes()
-    private val documentVedleggA = readTestResource("/vedleggA.pdf")!!.readBytes()
-    private val documentVedleggB = readTestResource("/vedleggB.pdf")!!.readBytes()
-    private val invalidDocument = readTestResource("/not_a_pdf")!!.readBytes()
-
-    @Test
-    fun testMergeTwoHoveddokument() {
-        val mergedDocument = pdfMerger.mergeWithSeparator(
-            createInfo(),
-            mutableMapOf("a.pdf" to documentA, "b.pdf" to documentB)
-        )
-
-        assertEquals(
-            expected = load(documentA).numberOfPages + load(documentB).numberOfPages + 3,
-            actual = load(mergedDocument).numberOfPages,
-            message = "The merged document should have the same page count as the sum of pages " +
-                "of the input documents + one frontpage and two separatorpages"
-        )
+    @ParameterizedTest
+    @MethodSource("MergeinputAndPageCountOnResult")
+    fun `test that mergeWithSeparator returns the pagenumbers as expected`(
+        mergeRequest: MergeRequest,
+        expectedResult: Int,
+        msg: String
+    ) {
+        val mergedDocument = pdfMerger.merge(mergeRequest)
+        assertEquals(expectedResult, load(mergedDocument).numberOfPages, msg)
     }
 
-    @Test
-    fun testMergeTwoHoveddokumentOneWithVedlegg() {
-        val mergedDocument = pdfMerger.mergeWithSeparator(
-            createInfoWithVedlegg(),
-            mutableMapOf(
-                "a.pdf" to documentA,
-                "b.pdf" to documentB,
-                "vedleggA.pdf" to documentVedleggA
+    companion object {
+        private val documentA = readTestResource("/a.pdf")
+        private val documentB = readTestResource("/b.pdf")
+        private val documentVedleggA = readTestResource("/vedleggA.pdf")
+        private val documentVedleggB = readTestResource("/vedleggB.pdf")
+
+        @JvmStatic
+        fun MergeinputAndPageCountOnResult() = listOf(
+            Arguments.of(
+                MergeRequest(
+                    mockMergeinfo(listOf("a.pdf", "b.pdf"), listOf()),
+                    mapOf("a.pdf" to documentA, "b.pdf" to documentB)
+                ),
+                load(documentA).numberOfPages + load(documentB).numberOfPages + 3,
+                "The merged document should have the same page count as the sum of pages " +
+                    "of the input documents + one frontpage and two separatorpages"
+            ),
+            Arguments.of(
+                MergeRequest(
+                    mockMergeinfo(listOf("a.pdf", "b.pdf"), listOf("vedleggA.pdf", "vedleggB.pdf")),
+                    mapOf(
+                        "a.pdf" to documentA,
+                        "b.pdf" to documentB,
+                        "vedleggA.pdf" to documentVedleggA,
+                        "vedleggB.pdf" to documentVedleggB
+                    )
+                ),
+                load(documentA).numberOfPages + load(documentVedleggA).numberOfPages +
+                    load(documentVedleggB).numberOfPages + load(documentB).numberOfPages + 3,
+                "The merged document should have the same page count as the sum of pages " +
+                    "of the two hoveddokumentene and the two vedleggene + one frontpage and two separatorpages"
+            ),
+            Arguments.of(
+                MergeRequest(
+                    mockMergeinfoWithoutHoveddokument(listOf("vedleggA.pdf", "vedleggB.pdf")),
+                    mapOf("vedleggA.pdf" to documentVedleggA, "vedleggB.pdf" to documentVedleggB)
+                ),
+                load(documentVedleggA).numberOfPages +
+                    load(documentVedleggB).numberOfPages + 2,
+                "The merged document should have the same page count as the sum of pages " +
+                    "of the input vedleggene + one frontpage and one separatorpage"
             )
         )
 
-        assertEquals(
-            expected = load(documentA).numberOfPages + load(documentVedleggA).numberOfPages +
-                load(documentB).numberOfPages + 3,
-            actual = load(mergedDocument).numberOfPages,
-            message = "The merged document should have the same page count as the sum of pages " +
-                "of the input documents + one frontpage and two separatorpages"
-        )
-    }
+        private fun mockMergeinfo(hoveddokument: List<String>, vedlegg: List<String>): MergeInfo {
+            return MergeInfo("Mitt Navn", "0101202012345", mockDokumentinfo(hoveddokument, vedlegg))
+        }
 
-    @Test
-    fun testMergeTwoHoveddokumentOneWithTwoVedlegg() {
-        val mergedDocument = pdfMerger.mergeWithSeparator(
-            createInfoWithTwoVedlegg(),
-            mutableMapOf(
-                "a.pdf" to documentA,
-                "b.pdf" to documentB,
-                "vedleggA.pdf" to documentVedleggA,
-                "vedleggB.pdf" to documentVedleggB
+        private fun mockMergeinfoWithoutHoveddokument(vedlegg: List<String>): MergeInfo {
+            return MergeInfo(
+                "Mitt Navn",
+                "0101202012345",
+                mockDokumentinfoWithoutHoveddokument(vedlegg)
             )
-        )
+        }
 
-        assertEquals(
-            expected = load(documentA).numberOfPages + load(documentVedleggA).numberOfPages +
-                load(documentVedleggB).numberOfPages + load(documentB).numberOfPages + 3,
-            actual = load(mergedDocument).numberOfPages,
-            message = "The merged document should have the same page count as the sum of pages " +
-                "of the input documents + one frontpage and two separatorpages"
-        )
-    }
-
-    @Test
-    fun testMergeTwoVedleggNoHoveddokument() {
-        val mergedDocument = pdfMerger.mergeWithSeparator(
-            createInfoWithTwoVedleggWithoutHoveddokument(),
-            mutableMapOf("vedleggA.pdf" to documentVedleggA, "vedleggB.pdf" to documentVedleggB)
-        )
-
-        assertEquals(
-            expected = load(documentVedleggA).numberOfPages +
-                load(documentVedleggB).numberOfPages + 2,
-            actual = load(mergedDocument).numberOfPages,
-            message = "The merged document should have the same page count as the sum of pages " +
-                "of the input documents + one frontpage and one separatorpage"
-        )
-    }
-
-    @Test(expected = IOException::class)
-    fun test_mergeWithSeparator_of_invalid_document_throws_IOException() {
-        pdfMerger.mergeWithSeparator(
-            createInfoWithBadFile(),
-            mutableMapOf(
-                "a.pdf" to documentA,
-                "not_a_pdf" to invalidDocument
+        private fun mockDokumentinfo(hoveddokumenter: List<String>, vedlegg: List<String>): List<Dokumentinfo> {
+            return listOf(
+                Dokumentinfo(
+                    dokumenttype = "I",
+                    fagomrade = "Uføre",
+                    saknr = "2000",
+                    mottattSendtDato = LocalDate.now(),
+                    vedleggListe = mockVedlegg(vedlegg),
+                    hoveddokument = mockHoveddokument(
+                        hoveddokumenter.get(0),
+                        "Innhold i hoveddokument ${hoveddokumenter.get(0)}"
+                    )
+                ),
+                Dokumentinfo(
+                    "U",
+                    "Uføre",
+                    "2000",
+                    "Bruker",
+                    LocalDate.now(),
+                    listOf(),
+                    mockHoveddokument(
+                        hoveddokumenter.get(1),
+                        "Innhold i hoveddokument ${hoveddokumenter.get(1)}"
+                    )
+                )
             )
-        )
-    }
+        }
 
-    @Test(expected = BadRequestException::class)
-    fun test_mergeWithSeparator_with_missing_file_throws_BadRequestExtection() {
-        pdfMerger.mergeWithSeparator(createInfo(), mutableMapOf("a.pdf" to documentA))
-    }
+        private fun mockDokumentinfoWithoutHoveddokument(vedlegg: List<String>): List<Dokumentinfo> {
+            return listOf(
+                Dokumentinfo(
+                    dokumenttype = "I",
+                    fagomrade = "Uføre",
+                    saknr = "2000",
+                    avsenderMottaker = null,
+                    mottattSendtDato = LocalDate.now(),
+                    vedleggListe = mockVedlegg(vedlegg)
+                )
+            )
+        }
 
-    private fun createInfo() = mergeInfoFromResource("/mergerequest.json")
-
-    private fun createInfoWithBadFile() = mergeInfoFromResource("/mergerequestWithBadFile.json")
-
-    private fun createInfoWithVedlegg() = mergeInfoFromResource("/mergerequestWithVedlegg.json")
-
-    private fun createInfoWithTwoVedlegg() = mergeInfoFromResource("/mergerequestWithTwoVedlegg.json")
-
-    private fun createInfoWithTwoVedleggWithoutHoveddokument() =
-        mergeInfoFromResource("/mergerequestTwoVedleggWithoutHoveddokument.json")
-
-    private fun mergeInfoFromResource(name: String): MergeInfo =
-        javaClass.getResource(name)
-            ?.run {
-                objectMapper.readValue(readText(charset("UTF-8")))
+        private fun mockVedlegg(vedlegg: List<String>): List<Dokument> {
+            val vedleggDokumenter = mutableListOf<Dokument>()
+            vedlegg.forEach {
+                vedleggDokumenter.add(Dokument(it, "Innhold i vedlegg $it"))
             }
-            ?: throw RuntimeException("Could not find resource with name $name")
+            return vedleggDokumenter.toList()
+        }
 
-    private fun readTestResource(name: String) =
-        javaClass.getResourceAsStream(name)
+        private fun mockHoveddokument(filnavn: String, innhold: String): Dokument {
+            return Dokument(filnavn, innhold)
+        }
+
+        private fun readTestResource(name: String) =
+            AdvancedPdfMergerTest::class.java.getResourceAsStream(name)?.readBytes()
+                ?: throw FileNotFoundException("Missing testfile $name")
+    }
 }

@@ -9,17 +9,25 @@ data class MergeInfo(
 )
 
 data class Dokumentinfo(
-    val filnavn: String?,
     val dokumenttype: String,
     val fagomrade: String,
     val saknr: String,
-    val avsenderMottaker: String?,
-    val dokumentnavn: String?,
+    val avsenderMottaker: String? = null,
     val mottattSendtDato: LocalDate,
-    val vedleggListe: List<VedleggDokument>,
-)
+    val vedleggListe: List<Dokument>,
+    val hoveddokument: Dokument? = null
+) {
 
-data class VedleggDokument(
+    fun getSortedDokumenter(): List<Dokument> {
+        if (hoveddokument != null) {
+            return listOf(hoveddokument) + vedleggListe
+        } else {
+            return vedleggListe
+        }
+    }
+}
+
+data class Dokument(
     val filnavn: String,
     val dokumentnavn: String,
 )

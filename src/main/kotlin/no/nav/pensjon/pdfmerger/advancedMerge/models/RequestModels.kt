@@ -9,17 +9,16 @@ data class MergeInfoRequest(
 )
 
 data class DokumentinfoRequest(
-    val filnavn: String?,
     val dokumenttype: String,
     val fagomrade: String,
     val saknr: String,
     val avsenderMottaker: String?,
-    val dokumentnavn: String?,
     val mottattSendtDato: LocalDate,
-    val vedleggListe: List<VedleggDokumentRequest>?
+    val vedleggListe: List<DokumentRequest>?,
+    val hoveddokument: DokumentRequest?
 )
 
-data class VedleggDokumentRequest(
+data class DokumentRequest(
     val filnavn: String,
     val dokumentnavn: String,
 )
