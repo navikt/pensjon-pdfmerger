@@ -20,5 +20,5 @@ data class DokumentinfoRequest(
 
 data class DokumentRequest(
     val filnavn: String,
-    val dokumentnavn: String,
+    val dokumentnavn: String
 )
