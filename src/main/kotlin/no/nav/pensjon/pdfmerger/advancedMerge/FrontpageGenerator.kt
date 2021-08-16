@@ -3,6 +3,7 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 import com.lowagie.text.*
 import com.lowagie.text.pdf.PdfPCell
 import com.lowagie.text.pdf.PdfPTable
+import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.SPACING
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import java.time.format.DateTimeFormatter
@@ -15,20 +16,20 @@ class FrontpageGenerator {
         mergeContext: MergeContext,
         mergeRequest: MergeRequest
     ) {
-        mergeContext.document.add(mergeContext.emptyParagraph)
+        mergeContext.document.add(MergeContext.EMPTY_PARAGRAPH)
 
         val title = Paragraph(
             "Dokumentoversikt for",
             HEADING_FONT
         )
         title.setAlignment(Paragraph.ALIGN_CENTER)
-        title.setSpacingAfter(mergeContext.SPACING.toFloat())
+        title.setSpacingAfter(SPACING.toFloat())
         mergeContext.document.add(title)
 
         val gjelder = Paragraph()
-        gjelder.add(Chunk("${mergeRequest.gjelderID} ${mergeRequest.gjelderNavn}", mergeContext.INFO_FONT_BOLD))
+        gjelder.add(Chunk("${mergeRequest.gjelderID} ${mergeRequest.gjelderNavn}", MergeContext.INFO_FONT_BOLD))
         gjelder.setAlignment(Paragraph.ALIGN_CENTER)
-        gjelder.setSpacingAfter(mergeContext.SPACING.toFloat())
+        gjelder.setSpacingAfter(SPACING.toFloat())
         mergeContext.document.add(gjelder)
 
         mergeContext.document.add(createContentsTable(mergeRequest.dokumentinfo))

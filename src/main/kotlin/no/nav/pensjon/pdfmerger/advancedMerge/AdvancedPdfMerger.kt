@@ -2,16 +2,13 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 
 import com.lowagie.text.*
 import com.lowagie.text.pdf.*
+import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.PAGE_MARGIN
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 
 class AdvancedPdfMerger(
     private val frontpageGenerator: FrontpageGenerator = FrontpageGenerator(),
-    private val separatorpageGenerator: SeparatorpageGenerator = SeparatorpageGenerator(PAGE_MARGIN)
+    private val separatorpageGenerator: SeparatorpageGenerator = SeparatorpageGenerator()
 ) {
-    companion object {
-        private val PAGE_MARGIN = 10.0f
-    }
-
     fun merge(mergeRequest: MergeRequest): ByteArray {
         val mergeContext = createDocument(mergeRequest)
 
