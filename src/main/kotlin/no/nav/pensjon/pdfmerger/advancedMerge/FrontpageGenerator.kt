@@ -3,15 +3,14 @@ package no.nav.pensjon.pdfmerger.advancedMerge
 import com.lowagie.text.*
 import com.lowagie.text.pdf.PdfPCell
 import com.lowagie.text.pdf.PdfPTable
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import java.time.format.DateTimeFormatter
 
-val SPACING = 50
-val INFO_FONT_BOLD: Font = Font(Font.TIMES_ROMAN, 18f, Font.BOLD)
-private val HEADING_FONT: Font = Font(Font.TIMES_ROMAN, 24f, Font.BOLD)
-private val NORMAL_FONT: Font = Font(Font.TIMES_ROMAN, 11f, Font.NORMAL)
-
 class FrontpageGenerator {
+    private val HEADING_FONT: Font = Font(Font.TIMES_ROMAN, 24f, Font.BOLD)
+    private val NORMAL_FONT: Font = Font(Font.TIMES_ROMAN, 11f, Font.NORMAL)
+
     fun createFrontPage(
         mergeContext: MergeContext,
         mergeRequest: MergeRequest
@@ -23,17 +22,16 @@ class FrontpageGenerator {
             HEADING_FONT
         )
         title.setAlignment(Paragraph.ALIGN_CENTER)
-        title.setSpacingAfter(SPACING.toFloat())
+        title.setSpacingAfter(mergeContext.SPACING.toFloat())
         mergeContext.document.add(title)
 
         val gjelder = Paragraph()
-        gjelder.add(Chunk("${mergeRequest.gjelderID} ${mergeRequest.gjelderNavn}", INFO_FONT_BOLD))
+        gjelder.add(Chunk("${mergeRequest.gjelderID} ${mergeRequest.gjelderNavn}", mergeContext.INFO_FONT_BOLD))
         gjelder.setAlignment(Paragraph.ALIGN_CENTER)
-        gjelder.setSpacingAfter(SPACING.toFloat())
+        gjelder.setSpacingAfter(mergeContext.SPACING.toFloat())
         mergeContext.document.add(gjelder)
 
         mergeContext.document.add(createContentsTable(mergeRequest.dokumentinfo))
-        mergeContext.document.newPage()
     }
 
     private fun createContentsTable(dokumentinfoListe: List<Dokumentinfo>): PdfPTable {
@@ -60,10 +58,18 @@ class FrontpageGenerator {
             val cell = PdfPCell(Phrase(dokumentinfo.dokumenttype, NORMAL_FONT))
             cell.horizontalAlignment = Element.ALIGN_CENTER
 
+            val firstDokument = dokumentinfo.getSortedDokumenter().get(0)
+            val otherDokuments: List<Dokument>
+            if (dokumentinfo.getSortedDokumenter().size > 1) {
+                otherDokuments = dokumentinfo.getSortedDokumenter().subList(1, dokumentinfo.getSortedDokumenter().size)
+            } else {
+                otherDokuments = listOf()
+            }
+
             contentsTable.apply {
                 addCell(
                     Phrase(
-                        "" + index+1 + " av " + dokumentinfoListe.size, NORMAL_FONT
+                        "" + (index + 1) + " av " + dokumentinfoListe.size, NORMAL_FONT
                     )
                 )
                 addCell(cell)
@@ -78,11 +84,16 @@ class FrontpageGenerator {
                 addCell(Phrase(dokumentinfo.fagomrade, NORMAL_FONT))
                 addCell(Phrase(dokumentinfo.saknr, NORMAL_FONT))
                 addCell(Phrase(dokumentinfo.avsenderMottaker, NORMAL_FONT))
-                addCell(Phrase(dokumentinfo.dokumentnavn, NORMAL_FONT))
-                addCell(Phrase(" ", NORMAL_FONT))
+                if (dokumentinfo.hoveddokument != null) {
+                    addCell(Phrase(firstDokument.dokumentnavn, NORMAL_FONT))
+                    addCell(Phrase(" ", NORMAL_FONT))
+                } else {
+                    addCell(Phrase(" ", NORMAL_FONT))
+                    addCell(Phrase(firstDokument.dokumentnavn, NORMAL_FONT))
+                }
             }
 
-            dokumentinfo.vedleggListe.forEach { vedlegg ->
+            otherDokuments.forEach { vedlegg ->
                 addEmptyCells(contentsTable)
                 contentsTable.addCell(Phrase(vedlegg.dokumentnavn, NORMAL_FONT))
             }

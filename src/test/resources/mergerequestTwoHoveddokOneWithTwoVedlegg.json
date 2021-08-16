@@ -1,28 +1,38 @@
 {
   "dokumentinfo": [
     {
-      "filnavn": "a.pdf",
       "dokumenttype": "I",
       "fagomrade": "Uføre",
       "saknr": "2000",
       "avsenderMottaker": "Ingen oppgitt",
-      "dokumentnavn": "Innhold av hoveddok 1",
       "mottattSendtDato": "2021-08-03",
+      "hoveddokument":
+      {
+        "filnavn": "a.pdf",
+        "dokumentnavn": "Innhold av hoveddok 1"
+      },
       "vedleggListe": [
         {
           "filnavn": "vedleggA.pdf",
-          "dokumentnavn": "Innhold vedlegg"
+          "dokumentnavn": "Innhold vedlegg 1"
+        },
+        {
+          "filnavn": "vedleggB.pdf",
+          "dokumentnavn": "Innhold vedlegg 2"
         }
       ]
     },
     {
-      "filnavn": "b.pdf",
       "dokumenttype": "U",
       "fagomrade": "Uføre",
       "saknr": "2000",
       "avsenderMottaker": "Ingen oppgitt",
-      "dokumentnavn": "Innhold av hoveddok 2",
-      "mottattSendtDato": "2021-08-04"
+      "mottattSendtDato": "2021-08-04",
+      "hoveddokument":
+      {
+        "filnavn": "b.pdf",
+        "dokumentnavn": "Innhold av hoveddok 2"
+      }
     }
   ],
   "gjelderNavn": "Mitt Navn",

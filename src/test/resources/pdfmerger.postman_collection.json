@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8dca1106-278a-4ebf-8b12-dcd4506a2a5a",
+		"_postman_id": "0886f735-8f7f-4c21-b66a-c1da0b778ea1",
 		"name": "pdfmerger",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -136,6 +136,190 @@
 					"port": "8080",
 					"path": [
 						"metrics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "mergeWithSeparator_2Hoveddokument",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type to be application/pdf\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/pdf\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "files",
+							"type": "file",
+							"src": [
+								"./a.pdf",
+								"./b.pdf"
+							]
+						},
+						{
+							"key": "documentinfo",
+							"value": "{\n  \"dokumentinfo\": [\n    {\n      \"dokumenttype\": \"I\",\n      \"fagomrade\": \"Uføre\",\n      \"saknr\": \"2000\",\n      \"mottattSendtDato\": \"2021-08-03\",\n      \"hoveddokument\":\n      {\n        \"dokumentnavn\": \"Innhold av hoveddok\",\n        \"filnavn\": \"a.pdf\"\n      }\n    },\n    {\n      \"dokumenttype\": \"U\",\n      \"fagomrade\": \"Uføre\",\n      \"saknr\": \"2000\",\n      \"avsenderMottaker\": \"Ingen oppgitt\",\n      \"mottattSendtDato\": \"2021-08-04\",\n      \"hoveddokument\":\n      {\n        \"dokumentnavn\": \"Innhold av hoveddok 2\",\n        \"filnavn\": \"b.pdf\"\n      }\n    }\n  ],\n  \"gjelderNavn\": \"Mitt Navn\",\n  \"gjelderID\": \"0101202012345\"\n}\n",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/mergeWithSeparator?Content-Type=multipart/form-data",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"mergeWithSeparator"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "multipart/form-data"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "mergeWithSeparator_2Vedlegg",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type to be application/pdf\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/pdf\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "pdf1_ved2",
+							"type": "file",
+							"src": [
+								"./vedleggA.pdf",
+								"./vedleggB.pdf"
+							]
+						},
+						{
+							"key": "documentinfo",
+							"value": "{\n  \"dokumentinfo\": [\n    {\n      \"dokumenttype\": \"I\",\n      \"fagomrade\": \"Uføre\",\n      \"saknr\": \"2000\",\n      \"avsenderMottaker\": \"Ingen oppgitt\",\n      \"mottattSendtDato\": \"2021-08-03\",\n      \"vedleggListe\": [\n        {\n          \"filnavn\": \"vedleggA.pdf\",\n          \"dokumentnavn\": \"Innhold vedlegg 1\"\n        },\n        {\n          \"filnavn\": \"vedleggB.pdf\",\n          \"dokumentnavn\": \"Innhold vedlegg 2\"\n        }\n      ]\n    }\n  ],\n  \"gjelderNavn\": \"Mitt Navn\",\n  \"gjelderID\": \"0101202012345\"\n}\n",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/mergeWithSeparator?Content-Type=multipart/form-data",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"mergeWithSeparator"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "multipart/form-data"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "mergeWithSeparator_2HoveddokumentOneWith2Vedlegg",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type to be application/pdf\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/pdf\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "documentinfo",
+							"value": "{\n  \"dokumentinfo\": [\n    {\n      \"dokumenttype\": \"I\",\n      \"fagomrade\": \"Uføre\",\n      \"saknr\": \"2000\",\n      \"avsenderMottaker\": \"Ingen oppgitt\",\n      \"mottattSendtDato\": \"2021-08-03\",\n      \"hoveddokument\":\n      {\n        \"filnavn\": \"a.pdf\",\n        \"dokumentnavn\": \"Innhold av hoveddok 1\"\n      },\n      \"vedleggListe\": [\n        {\n          \"filnavn\": \"vedleggA.pdf\",\n          \"dokumentnavn\": \"Innhold vedlegg 1\"\n        },\n        {\n          \"filnavn\": \"vedleggB.pdf\",\n          \"dokumentnavn\": \"Innhold vedlegg 2\"\n        }\n      ]\n    },\n    {\n      \"dokumenttype\": \"U\",\n      \"fagomrade\": \"Uføre\",\n      \"saknr\": \"2000\",\n      \"avsenderMottaker\": \"Ingen oppgitt\",\n      \"mottattSendtDato\": \"2021-08-04\",\n      \"hoveddokument\":\n      {\n        \"filnavn\": \"b.pdf\",\n        \"dokumentnavn\": \"Innhold av hoveddok 2\"\n      }\n    }\n  ],\n  \"gjelderNavn\": \"Mitt Navn\",\n  \"gjelderID\": \"0101202012345\"\n}\n",
+							"type": "text"
+						},
+						{
+							"key": "",
+							"type": "file",
+							"src": [
+								"./a.pdf",
+								"./b.pdf",
+								"./vedleggA.pdf",
+								"./vedleggB.pdf"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "http://{{host}}:8080/mergeWithSeparator?Content-Type=multipart/form-data",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "8080",
+					"path": [
+						"mergeWithSeparator"
+					],
+					"query": [
+						{
+							"key": "Content-Type",
+							"value": "multipart/form-data"
+						}
 					]
 				}
 			},
