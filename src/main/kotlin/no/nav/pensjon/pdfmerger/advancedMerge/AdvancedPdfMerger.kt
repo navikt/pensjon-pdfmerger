@@ -51,9 +51,9 @@ class AdvancedPdfMerger(
     private fun appendDocumentWithAttachments(
         mergeContext: MergeContext,
         mergeRequest: MergeRequest,
-        documentinfo: Dokumentinfo
+        dokumentinfo: Dokumentinfo
     ) {
-        mergeRequest.findFiles(documentinfo).forEach { file ->
+        mergeRequest.findFiles(dokumentinfo).forEach { file ->
             mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
             mergeContext.document.newPage()
             val reader = PdfReader(file)
