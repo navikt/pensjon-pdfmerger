@@ -13,12 +13,12 @@ data class MergeRequest(
     val dokumentinfo: List<Dokumentinfo> = mergeinfo.dokumentinfo
     val totalDokumentinfo: Int = dokumentinfo.size
 
-    fun findFiles(documentinfo: Dokumentinfo) = listOfNotNull(
-        documentinfo.hoveddokument?.let {
+    fun findFiles(dokumentinfo: Dokumentinfo) = listOfNotNull(
+        dokumentinfo.hoveddokument?.let {
             listOf(findFile(it.filnavn))
         },
 
-        documentinfo.vedleggListe.map {
+        dokumentinfo.vedleggListe.map {
             findFile(it.filnavn)
         }
     ).flatten()
