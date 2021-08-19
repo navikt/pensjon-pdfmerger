@@ -12,7 +12,7 @@ import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
 
-class PdfMerger : MeterBinder {
+class MeteringPdfMerger : MeterBinder {
     private lateinit var mergeCallCount: Counter
     private lateinit var documentCount: DistributionSummary
     private lateinit var documentSize: DistributionSummary
@@ -59,8 +59,7 @@ class PdfMerger : MeterBinder {
         return mergeWithSeparatorTimer.recordCallable {
             recordDocumentsToMerge(documents)
 
-            val merger = AdvancedPdfMerger()
-            val mergedDocument = merger.merge(MergeRequest(mergeinfo, documents))
+            val mergedDocument = AdvancedPdfMerger().merge(MergeRequest(mergeinfo, documents))
             mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument

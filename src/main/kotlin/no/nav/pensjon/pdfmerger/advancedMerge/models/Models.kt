@@ -14,17 +14,31 @@ data class Dokumentinfo(
     val saknr: String,
     val avsenderMottaker: String? = null,
     val mottattSendtDato: LocalDate,
+    val hoveddokument: Dokument? = null,
     val vedleggListe: List<Dokument>,
-    val hoveddokument: Dokument? = null
 ) {
-
-    fun getSortedDokumenter(): List<Dokument> {
-        if (hoveddokument != null) {
-            return listOf(hoveddokument) + vedleggListe
-        } else {
-            return vedleggListe
-        }
+    init {
+        require(hoveddokument != null || vedleggListe.isNotEmpty()) { "Må minst ha et hoveddokument eller vedlegg" }
     }
+
+    val hasHovedDokument: Boolean
+        get() = hoveddokument != null
+
+    val dokumentnavn: String
+        get() = (hoveddokument ?: vedleggListe[0]).dokumentnavn
+
+    val otherDokuments: List<Dokument>
+        get() = when {
+            hoveddokument != null -> {
+                vedleggListe
+            }
+            vedleggListe.size > 1 -> {
+                vedleggListe.drop(1)
+            }
+            else -> {
+                listOf()
+            }
+        }
 }
 
 data class Dokument(

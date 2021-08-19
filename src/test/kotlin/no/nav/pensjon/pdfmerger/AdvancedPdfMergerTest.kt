@@ -17,7 +17,7 @@ class AdvancedPdfMergerTest {
     private val pdfMerger = AdvancedPdfMerger()
 
     @ParameterizedTest
-    @MethodSource("MergeinputAndPageCountOnResult")
+    @MethodSource("mergeinputAndPageCountOnResult")
     fun `test that mergeWithSeparator returns the pagenumbers as expected`(
         mergeRequest: MergeRequest,
         expectedResult: Int,
@@ -34,7 +34,7 @@ class AdvancedPdfMergerTest {
         private val documentVedleggB = readTestResource("/vedleggB.pdf")
 
         @JvmStatic
-        fun MergeinputAndPageCountOnResult() = listOf(
+        fun mergeinputAndPageCountOnResult() = listOf(
             Arguments.of(
                 MergeRequest(
                     mockMergeinfo(listOf("a.pdf", "b.pdf"), listOf()),
@@ -92,8 +92,8 @@ class AdvancedPdfMergerTest {
                     mottattSendtDato = LocalDate.now(),
                     vedleggListe = mockVedlegg(vedlegg),
                     hoveddokument = mockHoveddokument(
-                        hoveddokumenter.get(0),
-                        "Innhold i hoveddokument ${hoveddokumenter.get(0)}"
+                        hoveddokumenter[0],
+                        "Innhold i hoveddokument ${hoveddokumenter[0]}"
                     )
                 ),
                 Dokumentinfo(
@@ -102,11 +102,11 @@ class AdvancedPdfMergerTest {
                     "2000",
                     "Bruker",
                     LocalDate.now(),
-                    listOf(),
                     mockHoveddokument(
-                        hoveddokumenter.get(1),
-                        "Innhold i hoveddokument ${hoveddokumenter.get(1)}"
-                    )
+                        hoveddokumenter[1],
+                        "Innhold i hoveddokument ${hoveddokumenter[1]}"
+                    ),
+                    listOf(),
                 )
             )
         }

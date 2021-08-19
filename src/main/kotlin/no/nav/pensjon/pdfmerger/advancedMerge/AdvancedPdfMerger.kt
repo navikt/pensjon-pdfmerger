@@ -1,20 +1,17 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
-import com.lowagie.text.*
-import com.lowagie.text.pdf.*
+import com.lowagie.text.Image.getInstance
+import com.lowagie.text.PageSize.A4
+import com.lowagie.text.pdf.PdfReader
+import com.lowagie.text.pdf.PdfWriter
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.PAGE_MARGIN
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
+import java.io.Closeable
 
 class AdvancedPdfMerger(
     private val frontpageGenerator: FrontpageGenerator = FrontpageGenerator(),
     private val separatorpageGenerator: SeparatorpageGenerator = SeparatorpageGenerator()
 ) {
-    fun merge(mergeRequest: MergeRequest): ByteArray {
-        val mergeContext = createDocument(mergeRequest)
-
-        return mergeContext.byteArrayOutputStream.toByteArray()
-    }
-
     /**
      * Generates the new PDF document consisting of
      * one front page with a table of content
@@ -23,10 +20,7 @@ class AdvancedPdfMerger(
      *  the page
      *  its vedlegg
      */
-    private fun createDocument(mergeRequest: MergeRequest): MergeContext {
-        val mergeContext = MergeContext()
-        mergeContext.document.open()
-
+    fun merge(mergeRequest: MergeRequest): ByteArray = MergeContext().use { mergeContext ->
         frontpageGenerator.createFrontPage(mergeContext, mergeRequest)
 
         mergeRequest.dokumentinfo.forEachIndexed { i, dokumentinfo ->
@@ -40,12 +34,8 @@ class AdvancedPdfMerger(
             appendDocumentWithAttachments(mergeContext, mergeRequest, dokumentinfo)
         }
 
-        if (mergeContext.document.isOpen) {
-            mergeContext.document.close()
-        }
-
-        return mergeContext
-    }
+        mergeContext
+    }.byteArrayOutputStream.toByteArray()
 
     // If no hoveddokument is given we still need to add its vedlegg
     private fun appendDocumentWithAttachments(
@@ -55,20 +45,30 @@ class AdvancedPdfMerger(
     ) {
         mergeRequest.findFiles(dokumentinfo).forEach { file ->
             mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
-            mergeContext.document.newPage()
-            val reader = PdfReader(file)
-            var page: PdfImportedPage
-            for (p in 1..reader.numberOfPages) {
-                page = mergeContext.pdfWriter.getImportedPage(reader, p)
-                val image = Image.getInstance(page)
-                image.scaleToFit(PageSize.A4.width(), PageSize.A4.height())
-                mergeContext.document.add(image)
-                if (p < reader.numberOfPages) {
+
+            ClosablePdfReader(mergeContext.pdfWriter, file).use { reader ->
+                for (pageNumber in 1..reader.numberOfPages) {
                     mergeContext.document.newPage()
+
+                    mergeContext.document.add(
+                        getInstance(
+                            mergeContext.pdfWriter.getImportedPage(
+                                reader,
+                                pageNumber
+                            )
+                        ).apply {
+                            scaleToFit(A4.width(), A4.height())
+                        }
+                    )
                 }
             }
-            mergeContext.pdfWriter.freeReader(reader)
-            reader.close()
+        }
+    }
+
+    class ClosablePdfReader(val pdfWriter: PdfWriter, file: ByteArray) : PdfReader(file), Closeable {
+        override fun close() {
+            pdfWriter.freeReader(this)
+            super.close()
         }
     }
 }

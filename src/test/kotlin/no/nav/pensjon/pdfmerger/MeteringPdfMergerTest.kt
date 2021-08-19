@@ -7,8 +7,8 @@ import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class PdfMergerTest {
-    private val pdfMerger = PdfMerger().apply {
+class MeteringPdfMergerTest {
+    private val meteringPdfMerger = MeteringPdfMerger().apply {
         bindTo(SimpleMeterRegistry())
     }
 
@@ -18,7 +18,7 @@ class PdfMergerTest {
 
     @Test
     fun testMergeDocuments() {
-        val mergedDocument = pdfMerger.mergeDocuments(listOf(documentA, documentB))
+        val mergedDocument = meteringPdfMerger.mergeDocuments(listOf(documentA, documentB))
 
         assertEquals(
             expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
@@ -33,7 +33,7 @@ class PdfMergerTest {
         assertFailsWith(
             IOException::class,
             {
-                pdfMerger.mergeDocuments(listOf(documentA, invalidDocument))
+                meteringPdfMerger.mergeDocuments(listOf(documentA, invalidDocument))
             }
         )
     }
