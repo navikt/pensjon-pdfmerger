@@ -64,7 +64,7 @@ class PdfMerger : MeterBinder {
             mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument
-        }
+        }!!
     }
 
     private fun recordDocumentsToMerge(documents: Map<String, ByteArray>) {

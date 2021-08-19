@@ -3,8 +3,8 @@ package no.nav.pensjon.pdfmerger
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.apache.pdfbox.pdmodel.PDDocument.load
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.Test
 import java.io.IOException
-import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PdfMergerTest {
