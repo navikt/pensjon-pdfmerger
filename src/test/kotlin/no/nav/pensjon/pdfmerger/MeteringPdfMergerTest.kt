@@ -3,9 +3,9 @@ package no.nav.pensjon.pdfmerger
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.apache.pdfbox.pdmodel.PDDocument.load
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.io.IOException
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class MeteringPdfMergerTest {
     private val meteringPdfMerger = MeteringPdfMerger().apply {
@@ -30,14 +30,11 @@ class MeteringPdfMergerTest {
 
     @Test
     fun test_merge_of_invalid_document_throws_IOException() {
-        assertFailsWith(
-            IOException::class,
-            {
-                meteringPdfMerger.mergeDocuments(listOf(documentA, invalidDocument))
-            }
-        )
+        assertThrows<IOException> { meteringPdfMerger.mergeDocuments(listOf(documentA, invalidDocument)) }
     }
 
     private fun readTestResource(name: String) =
-        javaClass.getResourceAsStream(name).readBytes()
+        javaClass.getResourceAsStream(name)
+            ?.readBytes()
+            ?: throw RuntimeException("Could now find resource '$name'")
 }

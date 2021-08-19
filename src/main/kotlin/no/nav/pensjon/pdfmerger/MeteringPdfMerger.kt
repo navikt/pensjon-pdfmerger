@@ -47,7 +47,7 @@ class MeteringPdfMerger : MeterBinder {
             mergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument
-        }
+        }!!
     }
 
     fun mergeWithSeparator(
@@ -63,7 +63,7 @@ class MeteringPdfMerger : MeterBinder {
             mergeWithSeparatorMergedDocumentSize.record(mergedDocument.size.toDouble())
 
             mergedDocument
-        }
+        }!!
     }
 
     private fun recordDocumentsToMerge(documents: Map<String, ByteArray>) {
