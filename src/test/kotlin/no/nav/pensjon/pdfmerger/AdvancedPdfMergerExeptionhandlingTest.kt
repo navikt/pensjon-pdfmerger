@@ -6,36 +6,47 @@ import no.nav.pensjon.pdfmerger.advancedMerge.MergeRequest
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
+import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.time.LocalDate
-import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 class AdvancedPdfMergerExeptionhandlingTest {
     private val pdfMerger = AdvancedPdfMerger()
     private val documentA = readTestResource("/a.pdf")
     private val invalidDocument = readTestResource("/not_a_pdf")
 
-    @Test(expected = BadRequestException::class)
+    @Test
     fun `mergeWithSeparator with missing file throws BadRequestExtection`() {
-        pdfMerger.merge(
-            MergeRequest(
-                mockMergeinfo(listOf("a.pdf", "b.pdf")),
-                mapOf("a.pdf" to documentA)
-            )
+        assertFailsWith(
+            BadRequestException::class,
+            {
+                pdfMerger.merge(
+                    MergeRequest(
+                        mockMergeinfo(listOf("a.pdf", "b.pdf")),
+                        mapOf("a.pdf" to documentA)
+                    )
+                )
+            }
         )
     }
 
-    @Test(expected = IOException::class)
+    @Test
     fun `mergeWithSeparator with invalid document throws IOException`() {
-        pdfMerger.merge(
-            MergeRequest(
-                mockMergeinfo(listOf("a.pdf", "not_a_pdf")),
-                mapOf(
-                    "a.pdf" to documentA,
-                    "not_a_pdf" to invalidDocument
+        assertFailsWith(
+            IOException::class,
+            {
+                pdfMerger.merge(
+                    MergeRequest(
+                        mockMergeinfo(listOf("a.pdf", "not_a_pdf")),
+                        mapOf(
+                            "a.pdf" to documentA,
+                            "not_a_pdf" to invalidDocument
+                        )
+                    )
                 )
-            )
+            }
         )
     }
 

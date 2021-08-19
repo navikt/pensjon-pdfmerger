@@ -154,7 +154,11 @@
 							"\r",
 							"pm.test(\"Content-Type to be application/pdf\", function () {\r",
 							"    pm.response.to.have.header(\"Content-Type\", \"application/pdf\");\r",
-							"});"
+							"});",
+							"pm.test(\"Body starts with the PDF file signature\", function () {",
+							"    pm.expect(pm.response.text()).to.satisfy(text => text.startsWith(\"%PDF-\"));",
+							"});",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -215,6 +219,10 @@
 							"pm.test(\"Content-Type to be application/pdf\", function () {\r",
 							"    pm.response.to.have.header(\"Content-Type\", \"application/pdf\");\r",
 							"});\r",
+							"",
+							"pm.test(\"Body starts with the PDF file signature\", function () {",
+							"    pm.expect(pm.response.text()).to.satisfy(text => text.startsWith(\"%PDF-\"));",
+							"});",
 							""
 						],
 						"type": "text/javascript"
@@ -276,6 +284,10 @@
 							"pm.test(\"Content-Type to be application/pdf\", function () {\r",
 							"    pm.response.to.have.header(\"Content-Type\", \"application/pdf\");\r",
 							"});\r",
+							"",
+							"pm.test(\"Body starts with the PDF file signature\", function () {",
+							"    pm.expect(pm.response.text()).to.satisfy(text => text.startsWith(\"%PDF-\"));",
+							"});",
 							""
 						],
 						"type": "text/javascript"

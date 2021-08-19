@@ -2,9 +2,10 @@ package no.nav.pensjon.pdfmerger
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.apache.pdfbox.pdmodel.PDDocument.load
+import org.junit.jupiter.api.Test
 import java.io.IOException
-import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class PdfMergerTest {
     private val pdfMerger = PdfMerger().apply {
@@ -27,9 +28,14 @@ class PdfMergerTest {
         )
     }
 
-    @Test(expected = IOException::class)
+    @Test
     fun test_merge_of_invalid_document_throws_IOException() {
-        pdfMerger.mergeDocuments(listOf(documentA, invalidDocument))
+        assertFailsWith(
+            IOException::class,
+            {
+                pdfMerger.mergeDocuments(listOf(documentA, invalidDocument))
+            }
+        )
     }
 
     private fun readTestResource(name: String) =
