@@ -47,13 +47,13 @@ class AdvancedPdfMerger(
             mergeContext.document.setMargins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
 
             ClosablePdfReader(mergeContext.pdfWriter, file).use { reader ->
-                for (pageNumber in 1..reader.numberOfPages) {
+                for (pageNumber in 1..reader.pdfReader.numberOfPages) {
                     mergeContext.document.newPage()
 
                     mergeContext.document.add(
                         getInstance(
                             mergeContext.pdfWriter.getImportedPage(
-                                reader,
+                                reader.pdfReader,
                                 pageNumber
                             )
                         ).apply {
@@ -65,10 +65,11 @@ class AdvancedPdfMerger(
         }
     }
 
-    class ClosablePdfReader(val pdfWriter: PdfWriter, file: ByteArray) : PdfReader(file), Closeable {
+    class ClosablePdfReader(private val pdfWriter: PdfWriter, file: ByteArray) : Closeable {
+        val pdfReader = PdfReader(file)
         override fun close() {
-            pdfWriter.freeReader(this)
-            super.close()
+            pdfWriter.freeReader(pdfReader)
+            pdfReader.close()
         }
     }
 }
