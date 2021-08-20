@@ -9,8 +9,7 @@ import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.SPACING
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 
-class SeparatorpageGenerator() {
-
+class SeparatorpageGenerator {
     fun createSeparatorPage(
         mergeContext: MergeContext,
         mergeRequest: MergeRequest,
@@ -20,10 +19,12 @@ class SeparatorpageGenerator() {
         mergeContext.document.newPage()
         mergeContext.document.add(EMPTY_PARAGRAPH)
 
-        val heading = Paragraph(mergeRequest.gjelderNavn, INFO_FONT_BOLD)
-        heading.setAlignment(Paragraph.ALIGN_CENTER)
-        heading.setSpacingAfter(SPACING.toFloat())
-        mergeContext.document.add(heading)
+        mergeContext.document.add(
+            Paragraph(mergeRequest.gjelderNavn, INFO_FONT_BOLD).apply {
+                setAlignment(Paragraph.ALIGN_CENTER)
+                setSpacingAfter(SPACING)
+            }
+        )
 
         mergeContext.document.add(
             createDokInfoLine(
@@ -50,14 +51,10 @@ class SeparatorpageGenerator() {
         )
     }
 
-    private fun createCenterInfoParagraph(paragraphString: String): Paragraph {
-        val paragraph = Paragraph(paragraphString, INFO_FONT_BOLD)
-        paragraph.apply {
-            setAlignment(Paragraph.ALIGN_CENTER)
-            setIndentationLeft(PAGE_MARGIN)
-            setIndentationRight(PAGE_MARGIN)
-        }
-        return paragraph
+    private fun createCenterInfoParagraph(paragraphString: String) = Paragraph(paragraphString, INFO_FONT_BOLD).apply {
+        setAlignment(Paragraph.ALIGN_CENTER)
+        setIndentationLeft(PAGE_MARGIN)
+        setIndentationRight(PAGE_MARGIN)
     }
 
     private fun addVedlegginfoToDocument(
@@ -65,12 +62,14 @@ class SeparatorpageGenerator() {
         vedleggListe: List<Dokument>
     ) {
         if (vedleggListe.isNotEmpty()) {
-            val spacer = Paragraph(" ")
-            spacer.setSpacingAfter((SPACING / 2).toFloat())
-            document.add(spacer)
+            document.add(
+                Paragraph(" ").apply {
+                    setSpacingAfter((SPACING / 2))
+                }
+            )
 
-            val paragraph = createCenterInfoParagraph("Vedlegg: ")
-            document.add(paragraph)
+            document.add(createCenterInfoParagraph("Vedlegg: "))
+
             vedleggListe.forEach {
                 document.add(createCenterInfoParagraph(it.dokumentnavn))
             }

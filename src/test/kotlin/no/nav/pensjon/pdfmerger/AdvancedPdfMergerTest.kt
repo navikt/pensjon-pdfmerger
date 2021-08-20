@@ -6,9 +6,8 @@ import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 import org.apache.pdfbox.pdmodel.PDDocument.load
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.TestFactory
 import java.io.FileNotFoundException
 import java.time.LocalDate
 import kotlin.test.assertEquals
@@ -16,16 +15,13 @@ import kotlin.test.assertEquals
 class AdvancedPdfMergerTest {
     private val pdfMerger = AdvancedPdfMerger()
 
-    @ParameterizedTest
-    @MethodSource("MergeinputAndPageCountOnResult")
-    fun `test that mergeWithSeparator returns the pagenumbers as expected`(
-        mergeRequest: MergeRequest,
-        expectedResult: Int,
-        msg: String
-    ) {
-        val mergedDocument = pdfMerger.merge(mergeRequest)
-        assertEquals(expectedResult, load(mergedDocument).numberOfPages, msg)
-    }
+    @TestFactory
+    fun `test that mergeWithSeparator returns the pagenumbers as expected`() = mergeinputAndPageCountOnResult()
+        .map { (mergeRequest, expectedResult, displayName) ->
+            dynamicTest(displayName) {
+                assertEquals(expectedResult, load(pdfMerger.merge(mergeRequest)).numberOfPages, displayName)
+            }
+        }
 
     companion object {
         private val documentA = readTestResource("/a.pdf")
@@ -33,9 +29,8 @@ class AdvancedPdfMergerTest {
         private val documentVedleggA = readTestResource("/vedleggA.pdf")
         private val documentVedleggB = readTestResource("/vedleggB.pdf")
 
-        @JvmStatic
-        fun MergeinputAndPageCountOnResult() = listOf(
-            Arguments.of(
+        fun mergeinputAndPageCountOnResult() = listOf(
+            Triple(
                 MergeRequest(
                     mockMergeinfo(listOf("a.pdf", "b.pdf"), listOf()),
                     mapOf("a.pdf" to documentA, "b.pdf" to documentB)
@@ -44,7 +39,7 @@ class AdvancedPdfMergerTest {
                 "The merged document should have the same page count as the sum of pages " +
                     "of the input documents + one frontpage and two separatorpages"
             ),
-            Arguments.of(
+            Triple(
                 MergeRequest(
                     mockMergeinfo(listOf("a.pdf", "b.pdf"), listOf("vedleggA.pdf", "vedleggB.pdf")),
                     mapOf(
@@ -59,7 +54,7 @@ class AdvancedPdfMergerTest {
                 "The merged document should have the same page count as the sum of pages " +
                     "of the two hoveddokumentene and the two vedleggene + one frontpage and two separatorpages"
             ),
-            Arguments.of(
+            Triple(
                 MergeRequest(
                     mockMergeinfoWithoutHoveddokument(listOf("vedleggA.pdf", "vedleggB.pdf")),
                     mapOf("vedleggA.pdf" to documentVedleggA, "vedleggB.pdf" to documentVedleggB)
@@ -92,8 +87,8 @@ class AdvancedPdfMergerTest {
                     mottattSendtDato = LocalDate.now(),
                     vedleggListe = mockVedlegg(vedlegg),
                     hoveddokument = mockHoveddokument(
-                        hoveddokumenter.get(0),
-                        "Innhold i hoveddokument ${hoveddokumenter.get(0)}"
+                        hoveddokumenter[0],
+                        "Innhold i hoveddokument ${hoveddokumenter[0]}"
                     )
                 ),
                 Dokumentinfo(
@@ -102,11 +97,11 @@ class AdvancedPdfMergerTest {
                     "2000",
                     "Bruker",
                     LocalDate.now(),
-                    listOf(),
                     mockHoveddokument(
-                        hoveddokumenter.get(1),
-                        "Innhold i hoveddokument ${hoveddokumenter.get(1)}"
-                    )
+                        hoveddokumenter[1],
+                        "Innhold i hoveddokument ${hoveddokumenter[1]}"
+                    ),
+                    listOf(),
                 )
             )
         }
