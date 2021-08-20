@@ -57,7 +57,7 @@ class AdvancedPdfMerger(
                                 pageNumber
                             )
                         ).apply {
-                            scaleToFit(A4.width(), A4.height())
+                            scaleToFit(A4.width, A4.height)
                         }
                     )
                 }
