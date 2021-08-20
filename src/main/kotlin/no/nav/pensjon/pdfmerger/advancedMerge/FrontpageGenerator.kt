@@ -40,13 +40,13 @@ class FrontpageGenerator {
         widthPercentage = 90f
         setWidths(intArrayOf(3, 3, 4, 5, 4, 5, 5, 5))
 
-        addPhrase("Nr")
-        addPhrase("Dok inn/Ut/Notat")
-        addPhrase("Reg.dato (I) Ferdigstilt dato (U/N)")
+        addPhrase("Nr.")
+        addPhrase("Dok. type")
+        addPhrase("Mottatt/sendt")
         addPhrase("Tema")
-        addPhrase("Sak")
-        addPhrase("Avsender (I) Mottaker (U)")
-        addPhrase("Innhold")
+        addPhrase("Saksnummer")
+        addPhrase("Avsender")
+        addPhrase("Hoveddokument")
         addPhrase("Vedlegg")
 
         dokumentinfoListe.forEachIndexed { index, dokumentinfo ->
