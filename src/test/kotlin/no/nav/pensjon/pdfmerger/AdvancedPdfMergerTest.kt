@@ -37,7 +37,7 @@ class AdvancedPdfMergerTest {
                 ),
                 load(documentA).numberOfPages + load(documentB).numberOfPages + 3,
                 "The merged document should have the same page count as the sum of pages " +
-                        "of the input documents + one frontpage and two separatorpages"
+                    "of the input documents + one frontpage and two separatorpages"
             ),
             Triple(
                 MergeRequest(
@@ -50,9 +50,9 @@ class AdvancedPdfMergerTest {
                     )
                 ),
                 load(documentA).numberOfPages + load(documentVedleggA).numberOfPages +
-                        load(documentVedleggB).numberOfPages + load(documentB).numberOfPages + 3,
+                    load(documentVedleggB).numberOfPages + load(documentB).numberOfPages + 3,
                 "The merged document should have the same page count as the sum of pages " +
-                        "of the two hoveddokumentene and the two vedleggene + one frontpage and two separatorpages"
+                    "of the two hoveddokumentene and the two vedleggene + one frontpage and two separatorpages"
             ),
             Triple(
                 MergeRequest(
@@ -60,9 +60,9 @@ class AdvancedPdfMergerTest {
                     mapOf("vedleggA.pdf" to documentVedleggA, "vedleggB.pdf" to documentVedleggB)
                 ),
                 load(documentVedleggA).numberOfPages +
-                        load(documentVedleggB).numberOfPages + 2,
+                    load(documentVedleggB).numberOfPages + 2,
                 "The merged document should have the same page count as the sum of pages " +
-                        "of the input vedleggene + one frontpage and one separatorpage"
+                    "of the input vedleggene + one frontpage and one separatorpage"
             )
         )
 
