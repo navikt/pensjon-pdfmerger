@@ -15,12 +15,13 @@ import io.ktor.http.content.PartData.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.streams.*
 import org.apache.pdfbox.pdmodel.PDDocument.load
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ApplicationTest {
+
     @Test
     fun `ping returns 200 status ok`() = withTestApplication(Application::main) {
         with(handleRequest(Get, "/ping")) {
@@ -116,7 +117,7 @@ class ApplicationTest {
     }
 
     private fun readTestResource(s: String) =
-        javaClass.getResourceAsStream(s).readBytes()
+        javaClass.getResourceAsStream(s)!!.readBytes()
 
     private fun TestApplicationCall.metric(name: String): String {
         val matchResult = Regex("$name (\\d+)").find(response.content!!)

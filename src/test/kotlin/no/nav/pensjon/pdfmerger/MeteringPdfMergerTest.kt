@@ -2,13 +2,13 @@ package no.nav.pensjon.pdfmerger
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.apache.pdfbox.pdmodel.PDDocument.load
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
-import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PdfMergerTest {
-    private val pdfMerger = PdfMerger().apply {
+class MeteringPdfMergerTest {
+    private val meteringPdfMerger = MeteringPdfMerger().apply {
         bindTo(SimpleMeterRegistry())
     }
 
@@ -18,7 +18,7 @@ class PdfMergerTest {
 
     @Test
     fun testMergeDocuments() {
-        val mergedDocument = pdfMerger.mergeDocuments(listOf(documentA, documentB))
+        val mergedDocument = meteringPdfMerger.mergeDocuments(listOf(documentA, documentB))
 
         assertEquals(
             expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
@@ -30,7 +30,7 @@ class PdfMergerTest {
 
     @Test
     fun test_merge_of_invalid_document_throws_IOException() {
-        assertThrows<IOException> { pdfMerger.mergeDocuments(listOf(documentA, invalidDocument)) }
+        assertThrows<IOException> { meteringPdfMerger.mergeDocuments(listOf(documentA, invalidDocument)) }
     }
 
     private fun readTestResource(name: String) =

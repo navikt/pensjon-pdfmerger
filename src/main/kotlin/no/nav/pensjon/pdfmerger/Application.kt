@@ -1,9 +1,11 @@
 package no.nav.pensjon.pdfmerger
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.http.ContentType.Application.Pdf
 import io.ktor.http.content.*
 import io.ktor.metrics.micrometer.*
 import io.ktor.request.*
@@ -16,6 +18,7 @@ import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig.DEFAULT
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.pensjon.pdfmerger.routes.simpleMerge
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 import org.slf4j.event.Level
@@ -23,7 +26,12 @@ import org.slf4j.event.Level
 val logger: Logger = getLogger(Application::class.java)
 
 fun Application.main() {
-    val pdfMerger = PdfMerger()
+    val meteringPdfMerger = MeteringPdfMerger()
+    val mapper = jsonMapper {
+        addModule(kotlinModule())
+        addModule(JavaTimeModule())
+    }
+
     val appMicrometerRegistry = PrometheusMeterRegistry(DEFAULT)
 
     install(MicrometerMetrics) {
@@ -33,7 +41,7 @@ fun Application.main() {
             JvmMemoryMetrics(),
             JvmGcMetrics(),
             ProcessorMetrics(),
-            pdfMerger
+            meteringPdfMerger
         )
     }
 
@@ -58,22 +66,9 @@ fun Application.main() {
             call.respond(appMicrometerRegistry.scrape())
         }
 
-        post("/merge") {
-            try {
-                val documents = call.receiveMultipart()
-                    .readAllParts()
-                    .filterIsInstance<PartData.FileItem>()
-                    .map { it.streamProvider().readAllBytes() }
+        simpleMerge(meteringPdfMerger)
 
-                val mergedDocument = pdfMerger.mergeDocuments(documents)
-
-                call.respondBytes(bytes = mergedDocument, contentType = Pdf)
-            } catch (e: Exception) {
-                logger.error("Unable to merge pdf documents", e)
-                call.response.status(HttpStatusCode.InternalServerError)
-                call.respondText { "Unable to merge PDF documents ${e.message}" }
-            }
-        }
+        mergeWithSeparator(meteringPdfMerger, mapper)
     }
 }
 

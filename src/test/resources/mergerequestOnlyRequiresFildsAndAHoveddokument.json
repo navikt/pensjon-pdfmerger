@@ -1,0 +1,16 @@
+{
+  "dokumentinfo": [
+    {
+      "dokumenttype": "I",
+      "fagomrade": "Uføre",
+      "saknr": "2000",
+      "mottattSendtDato": "2021-08-03",
+      "hoveddokument": {
+        "filnavn": "a.pdf",
+        "dokumentnavn": "Innhold av hoveddok 1"
+      }
+    }
+  ],
+  "gjelderNavn": "Mitt Navn",
+  "gjelderID": "0101202012345"
+}
