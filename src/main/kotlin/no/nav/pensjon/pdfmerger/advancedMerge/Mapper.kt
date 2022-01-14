@@ -1,6 +1,11 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
-import no.nav.pensjon.pdfmerger.advancedMerge.models.*
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
+import no.nav.pensjon.pdfmerger.advancedMerge.models.DokumentRequest
+import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
+import no.nav.pensjon.pdfmerger.advancedMerge.models.DokumentinfoRequest
+import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
+import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfoRequest
 
 fun mapRequestToDomain(info: MergeInfoRequest) = MergeInfo(
     gjelderID = info.gjelderID,
