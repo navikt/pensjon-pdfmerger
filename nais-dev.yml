@@ -6,7 +6,7 @@ metadata:
   labels:
     team: "teampensjon"
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "50M"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100M"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
 spec:
   image: "{{{ image }}}"
