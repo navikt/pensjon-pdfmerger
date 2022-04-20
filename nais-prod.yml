@@ -21,7 +21,7 @@ spec:
     timeout: 1
   resources:
     limits:
-      memory: "2048Mi"
+      memory: "3072Mi"
     requests:
       memory: "1024Mi"
   prometheus:
