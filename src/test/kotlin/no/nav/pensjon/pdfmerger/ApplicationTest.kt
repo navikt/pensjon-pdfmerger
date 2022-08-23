@@ -1,6 +1,5 @@
 package no.nav.pensjon.pdfmerger
 
-import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentDisposition.Parameters.FileName
@@ -12,6 +11,7 @@ import io.ktor.http.HttpMethod.Companion.Get
 import io.ktor.http.HttpMethod.Companion.Post
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.content.PartData.*
+import io.ktor.server.application.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.streams.*
 import org.apache.pdfbox.pdmodel.PDDocument.load
@@ -90,7 +90,7 @@ class ApplicationTest {
                     expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
                     actual = load(response.byteContent).numberOfPages,
                     message = "The merged document should have a page count" +
-                        " equal to the sum of pages in the input documents"
+                            " equal to the sum of pages in the input documents"
                 )
             }
 

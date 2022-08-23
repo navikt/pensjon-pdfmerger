@@ -1,6 +1,5 @@
 package no.nav.pensjon.pdfmerger
 
-import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentDisposition.Parameters.FileName
@@ -12,6 +11,7 @@ import io.ktor.http.HttpMethod.Companion.Get
 import io.ktor.http.HttpMethod.Companion.Post
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.content.PartData.*
+import io.ktor.server.application.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.streams.*
 import org.apache.pdfbox.pdmodel.PDDocument.load
@@ -112,13 +112,13 @@ class ApplicationAdvancedMergeTest {
 
                 assertEquals(
                     expected = load(documentA).numberOfPages +
-                        load(documentVedleggA).numberOfPages +
-                        load(documentVedleggB).numberOfPages +
-                        load(documentB).numberOfPages + 3,
+                            load(documentVedleggA).numberOfPages +
+                            load(documentVedleggB).numberOfPages +
+                            load(documentB).numberOfPages + 3,
                     actual = load(response.byteContent).numberOfPages,
                     message = "The merged document should have a page count" +
-                        " equal to the sum of pages in the input documents + " +
-                        "a frontpage and two separatorpages"
+                            " equal to the sum of pages in the input documents + " +
+                            "a frontpage and two separatorpages"
                 )
             }
 
@@ -132,7 +132,7 @@ class ApplicationAdvancedMergeTest {
                 }
                 assertEquals(
                     expected = documentA.size + documentB.size + documentVedleggA.size +
-                        documentVedleggB.size,
+                            documentVedleggB.size,
                     actual = metric("mergeWithSeparator_document_size_bytes_sum").toInt()
                 )
                 assertEquals(
@@ -194,8 +194,8 @@ class ApplicationAdvancedMergeTest {
                     expected = load(documentA).numberOfPages + 2,
                     actual = load(response.byteContent).numberOfPages,
                     message = "The merged document should have a page count" +
-                        " equal to the sum of pages in the input document + " +
-                        "a frontpage and one separatorpages"
+                            " equal to the sum of pages in the input document + " +
+                            "a frontpage and one separatorpages"
                 )
             }
 

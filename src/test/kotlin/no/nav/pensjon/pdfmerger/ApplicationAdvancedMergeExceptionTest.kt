@@ -1,6 +1,5 @@
 package no.nav.pensjon.pdfmerger
 
-import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentDisposition.Parameters.FileName
@@ -11,6 +10,7 @@ import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpMethod.Companion.Post
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.content.PartData.*
+import io.ktor.server.application.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.streams.*
 import org.junit.jupiter.api.Test
@@ -21,9 +21,8 @@ class ApplicationAdvancedMergeExceptionTest {
 
     @Test
     fun `posting request without documents to the advanced merge endpoint`() {
-        val mergeRequest = readTestResourceAsText("/mergerequestOnlyRequiresFildsAndAHoveddokument.json")
-
         withTestApplication(Application::main) {
+            val mergeRequest = readTestResourceAsText("/mergerequestOnlyRequiresFildsAndAHoveddokument.json")
             with(
                 handleRequest(Post, "/mergeWithSeparator") {
                     val boundary = "***bbb***"

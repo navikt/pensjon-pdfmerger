@@ -2,13 +2,13 @@ package no.nav.pensjon.pdfmerger
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.Pdf
 import io.ktor.http.content.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomain
 import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
 
@@ -26,11 +26,12 @@ fun Route.mergeWithSeparator(meteringPdfMerger: MeteringPdfMerger, mapper: JsonM
                         if (documents.containsKey(filename)) {
                             throw IllegalArgumentException(
                                 "Must have unique file name for documents, " +
-                                    "file $filename appears several times"
+                                        "file $filename appears several times"
                             )
                         }
                         documents[filename] = part.streamProvider().readBytes()
                     }
+
                     is PartData.FormItem -> {
                         if (info != null) {
                             throw IllegalArgumentException("Must only send one FormItem with MergeInfo")
@@ -38,6 +39,7 @@ fun Route.mergeWithSeparator(meteringPdfMerger: MeteringPdfMerger, mapper: JsonM
 
                         info = mapRequestToDomain(mapper.readValue(part.value))
                     }
+
                     else -> {
                         logger.warn("Don't know how to handle part of type ${part::class}}")
                     }

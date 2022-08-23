@@ -1,6 +1,6 @@
 package no.nav.pensjon.pdfmerger
 
-import io.ktor.features.*
+import io.ktor.server.plugins.*
 import no.nav.pensjon.pdfmerger.advancedMerge.AdvancedPdfMerger
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeRequest
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument

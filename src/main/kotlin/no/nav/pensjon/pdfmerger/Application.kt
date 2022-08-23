@@ -3,16 +3,14 @@ package no.nav.pensjon.pdfmerger
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.metrics.micrometer.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
 import io.ktor.server.engine.*
+import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
@@ -46,8 +44,8 @@ fun Application.main() {
     }
 
     install(CallLogging) {
-        mdc("application-id") { call ->
-            call.request.headers["x-application-id"]
+        mdc("application-id") { call: ApplicationCall ->
+            call.request.header("x-application-id")
         }
 
         mdc("correlation-id", ::correlationId)
@@ -73,8 +71,8 @@ fun Application.main() {
 }
 
 private fun correlationId(call: ApplicationCall) = listOfNotNull(
-    call.request.headers["Nav-Call-Id"],
-    call.request.headers["x-correlation-id"]
+    call.request.header("Nav-Call-Id"),
+    call.request.header("x-correlation-id")
 ).firstOrNull()
 
 fun main() {
