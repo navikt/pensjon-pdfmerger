@@ -5,8 +5,6 @@ import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import io.ktor.application.*
 import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.metrics.micrometer.*
 import io.ktor.request.*
 import io.ktor.response.*
