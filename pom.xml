@@ -143,38 +143,6 @@
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
-                <groupId>com.github.gantsign.maven</groupId>
-                <artifactId>ktlint-maven-plugin</artifactId>
-                <version>1.13.1</version>
-                <executions>
-                    <execution>
-                        <id>format-kotlin-code</id>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                        <!--
-                         Unable to get plugin to exclude generated sources (using sourcesExcludes),
-                         binding to a phase before sources are generated
-                        -->
-                        <phase>validate</phase>
-                        <configuration>
-                            <skip>${kotlin.format.skip}</skip>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>check-kotlin-code</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <!--
-                         Unable to get plugin to exclude generated sources (using sourcesExcludes),
-                         binding to a phase before sources are generated
-                        -->
-                        <phase>validate</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
