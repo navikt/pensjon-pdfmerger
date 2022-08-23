@@ -1,5 +1,8 @@
 package no.nav.pensjon.pdfmerger
 
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentDisposition.Parameters.FileName
@@ -7,12 +10,10 @@ import io.ktor.http.ContentDisposition.Parameters.Name
 import io.ktor.http.ContentType.MultiPart.FormData
 import io.ktor.http.HttpHeaders.ContentDisposition
 import io.ktor.http.HttpHeaders.ContentType
-import io.ktor.http.HttpMethod.Companion.Get
-import io.ktor.http.HttpMethod.Companion.Post
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.content.PartData.*
-import io.ktor.server.application.*
 import io.ktor.server.testing.*
+import io.ktor.utils.io.jvm.javaio.*
 import io.ktor.utils.io.streams.*
 import org.apache.pdfbox.pdmodel.PDDocument.load
 import org.junit.jupiter.api.Test
@@ -23,9 +24,13 @@ import kotlin.test.assertTrue
 class ApplicationTest {
 
     @Test
-    fun `ping returns 200 status ok`() = withTestApplication(Application::main) {
-        with(handleRequest(Get, "/ping")) {
-            assertEquals(OK, response.status())
+    fun `ping returns 200 status ok`() = testApplication {
+        application {
+            main()
+        }
+
+        client.get("/ping").apply {
+            assertEquals(OK, status)
         }
     }
 
@@ -38,89 +43,92 @@ class ApplicationTest {
      * input documents.
      */
     @Test
-    fun `posting documents to the merge endpoint`() {
+    fun `posting documents to the merge endpoint`() = testApplication {
+        application {
+            main()
+        }
+
         val documentA = readTestResource("/a.pdf")
         val documentB = readTestResource("/b.pdf")
 
-        withTestApplication(Application::main) {
-            with(
-                handleRequest(Post, "/merge") {
-                    val boundary = "***bbb***"
+        client.post("/merge") {
+            val boundary = "***bbb***"
 
-                    addHeader(
-                        name = ContentType,
-                        value = FormData.withParameter(name = "boundary", value = boundary)
-                            .toString()
+            header(
+                key = ContentType,
+                value = FormData.withParameter(name = "boundary", value = boundary)
+                    .toString()
+            )
+            setBody(
+                MultiPartFormDataContent(
+                    boundary = boundary,
+                    parts = listOf(
+                        FileItem(
+                            provider = { documentA.inputStream().asInput() },
+                            dispose = {},
+                            partHeaders = headersOf(
+                                name = ContentDisposition,
+                                value = File
+                                    .withParameter(Name, "a")
+                                    .withParameter(FileName, "a.pdf")
+                                    .toString()
+                            )
+                        ),
+                        FileItem(
+                            provider = { documentB.inputStream().asInput() },
+                            dispose = {},
+                            partHeaders = headersOf(
+                                name = ContentDisposition,
+                                value = File
+                                    .withParameter(Name, "b")
+                                    .withParameter(FileName, "b.pdf")
+                                    .toString()
+                            )
+                        ),
                     )
-                    setBody(
-                        boundary = boundary,
-                        parts = listOf(
-                            FileItem(
-                                provider = { documentA.inputStream().asInput() },
-                                dispose = {},
-                                partHeaders = headersOf(
-                                    name = ContentDisposition,
-                                    value = File
-                                        .withParameter(Name, "a")
-                                        .withParameter(FileName, "a.pdf")
-                                        .toString()
-                                )
-                            ),
-                            FileItem(
-                                provider = { documentB.inputStream().asInput() },
-                                dispose = {},
-                                partHeaders = headersOf(
-                                    name = ContentDisposition,
-                                    value = File
-                                        .withParameter(Name, "b")
-                                        .withParameter(FileName, "b.pdf")
-                                        .toString()
-                                )
-                            ),
-                        )
-                    )
-                }
-            ) {
-                assertEquals(
-                    expected = OK,
-                    actual = response.status()
                 )
+            )
+        }.apply {
+            assertEquals(
+                expected = OK,
+                actual = status
+            )
 
-                assertEquals(
-                    expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
-                    actual = load(response.byteContent).numberOfPages,
-                    message = "The merged document should have a page count" +
-                            " equal to the sum of pages in the input documents"
-                )
-            }
+            assertEquals(
+                expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
+                actual = load(bodyAsChannel().toInputStream()).numberOfPages,
+                message = "The merged document should have a page count" +
+                        " equal to the sum of pages in the input documents"
+            )
+        }
 
-            with(handleRequest(Get, "/metrics")) {
-                assertEquals(
-                    expected = OK,
-                    actual = response.status()
-                )
-                assertTrue { metric("merger_merged_document_size_bytes_sum").toInt() > 0 }
-                assertEquals(
-                    expected = documentA.size + documentB.size,
-                    actual = metric("merger_document_size_bytes_sum").toInt()
-                )
-                assertEquals(
-                    expected = 2,
-                    actual = metric("merger_document_count_files_sum").toLong()
-                )
-                assertEquals(
-                    expected = 1,
-                    actual = metric("merger_call_count_calls_total").toLong()
-                )
-            }
+
+        client.get("/metrics").apply {
+            assertEquals(
+                expected = OK,
+                actual = status
+            )
+            assertTrue { metric("merger_merged_document_size_bytes_sum").toInt() > 0 }
+            assertEquals(
+                expected = documentA.size + documentB.size,
+                actual = metric("merger_document_size_bytes_sum").toInt()
+            )
+            assertEquals(
+                expected = 2,
+                actual = metric("merger_document_count_files_sum").toLong()
+            )
+            assertEquals(
+                expected = 1,
+                actual = metric("merger_call_count_calls_total").toLong()
+            )
         }
     }
 
     private fun readTestResource(s: String) =
         javaClass.getResourceAsStream(s)!!.readBytes()
 
-    private fun TestApplicationCall.metric(name: String): String {
-        val matchResult = Regex("$name (\\d+)").find(response.content!!)
+    private suspend fun HttpResponse.metric(name: String): String {
+        val matchResult = Regex("$name (\\d+)").find(bodyAsText())
         assertNotNull(matchResult, message = "Metric $name was missing")
 
         val (size) = matchResult.destructured
