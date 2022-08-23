@@ -28,4 +28,5 @@ spec:
     enabled: true
     path: "/metrics"
   ingresses:
+    - "https://pensjon-pdfmerger.dev.adeo.no"
     - "https://pensjon-pdfmerger.dev.intern.nav.no"
