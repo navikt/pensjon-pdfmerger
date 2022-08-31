@@ -1,7 +1,10 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
-import com.lowagie.text.*
+import com.lowagie.text.Chunk
+import com.lowagie.text.Font
+import com.lowagie.text.Paragraph
 import com.lowagie.text.Paragraph.ALIGN_CENTER
+import com.lowagie.text.Phrase
 import com.lowagie.text.pdf.PdfPCell
 import com.lowagie.text.pdf.PdfPTable
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.EMPTY_PARAGRAPH
