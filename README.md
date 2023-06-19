@@ -2,8 +2,8 @@
 
 Se routing i Application-fila for å se operasjonene som tilbys
 
-##Kjøre lokalt
+## Kjøre lokalt
 
-###Fra IntelliJ
+### Fra IntelliJ
 Kjør main fra Application-fila
 
