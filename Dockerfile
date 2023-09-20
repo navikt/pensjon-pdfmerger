@@ -1,4 +1,4 @@
-FROM maven:3.6-jdk-11 AS build
+FROM maven:3-eclipse-temurin-17 AS build
 
 # Cache maven dependencies
 WORKDIR /build
@@ -11,7 +11,7 @@ COPY src /build/src
 RUN find .
 RUN mvn -Dkotlin.format.skip=true verify
 
-FROM adoptopenjdk:11-jre-hotspot
+FROM eclipse-temurin:17
 
 RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
 
