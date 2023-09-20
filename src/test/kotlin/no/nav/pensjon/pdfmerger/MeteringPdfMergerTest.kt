@@ -1,7 +1,7 @@
 package no.nav.pensjon.pdfmerger
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import org.apache.pdfbox.pdmodel.PDDocument.load
+import org.apache.pdfbox.Loader.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
@@ -21,8 +21,8 @@ class MeteringPdfMergerTest {
         val mergedDocument = meteringPdfMerger.mergeDocuments(listOf(documentA, documentB))
 
         assertEquals(
-            expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
-            actual = load(mergedDocument).numberOfPages,
+            expected = loadPDF(documentA).numberOfPages + loadPDF(documentB).numberOfPages,
+            actual = loadPDF(mergedDocument).numberOfPages,
             message = "The merged document should have the same page count as the sum of pages " +
                 "of the input documents"
         )
