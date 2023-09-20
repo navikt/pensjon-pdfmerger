@@ -5,7 +5,7 @@ import no.nav.pensjon.pdfmerger.advancedMerge.MergeRequest
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokument
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
-import org.apache.pdfbox.pdmodel.PDDocument.load
+import org.apache.pdfbox.Loader.loadPDF
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
 import java.io.FileNotFoundException
@@ -19,7 +19,7 @@ class AdvancedPdfMergerTest {
     fun `test that mergeWithSeparator returns the pagenumbers as expected`() = mergeinputAndPageCountOnResult()
         .map { (mergeRequest, expectedResult, displayName) ->
             dynamicTest(displayName) {
-                assertEquals(expectedResult, load(pdfMerger.merge(mergeRequest)).numberOfPages, displayName)
+                assertEquals(expectedResult, loadPDF(pdfMerger.merge(mergeRequest)).numberOfPages, displayName)
             }
         }
 
@@ -35,7 +35,7 @@ class AdvancedPdfMergerTest {
                     mockMergeinfo(listOf("a.pdf", "b.pdf"), listOf()),
                     mapOf("a.pdf" to documentA, "b.pdf" to documentB)
                 ),
-                load(documentA).numberOfPages + load(documentB).numberOfPages + 3,
+                loadPDF(documentA).numberOfPages + loadPDF(documentB).numberOfPages + 3,
                 "The merged document should have the same page count as the sum of pages " +
                     "of the input documents + one frontpage and two separatorpages"
             ),
@@ -49,8 +49,8 @@ class AdvancedPdfMergerTest {
                         "vedleggB.pdf" to documentVedleggB
                     )
                 ),
-                load(documentA).numberOfPages + load(documentVedleggA).numberOfPages +
-                    load(documentVedleggB).numberOfPages + load(documentB).numberOfPages + 3,
+                loadPDF(documentA).numberOfPages + loadPDF(documentVedleggA).numberOfPages +
+                    loadPDF(documentVedleggB).numberOfPages + loadPDF(documentB).numberOfPages + 3,
                 "The merged document should have the same page count as the sum of pages " +
                     "of the two hoveddokumentene and the two vedleggene + one frontpage and two separatorpages"
             ),
@@ -59,8 +59,8 @@ class AdvancedPdfMergerTest {
                     mockMergeinfoWithoutHoveddokument(listOf("vedleggA.pdf", "vedleggB.pdf")),
                     mapOf("vedleggA.pdf" to documentVedleggA, "vedleggB.pdf" to documentVedleggB)
                 ),
-                load(documentVedleggA).numberOfPages +
-                    load(documentVedleggB).numberOfPages + 2,
+                loadPDF(documentVedleggA).numberOfPages +
+                    loadPDF(documentVedleggB).numberOfPages + 2,
                 "The merged document should have the same page count as the sum of pages " +
                     "of the input vedleggene + one frontpage and one separatorpage"
             )

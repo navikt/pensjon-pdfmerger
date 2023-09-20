@@ -9,6 +9,8 @@ import io.micrometer.core.instrument.binder.MeterBinder
 import no.nav.pensjon.pdfmerger.advancedMerge.AdvancedPdfMerger
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeRequest
 import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
+import org.apache.pdfbox.io.RandomAccessRead
+import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
 
@@ -38,7 +40,7 @@ class MeteringPdfMerger : MeterBinder {
             documentCount.record(documents.size.toDouble())
             documents.forEach {
                 documentSize.record(it.size.toDouble())
-                pdfMerger.addSource(it.inputStream())
+                pdfMerger.addSource(RandomAccessReadBuffer(it))
             }
 
             pdfMerger.mergeDocuments(null)

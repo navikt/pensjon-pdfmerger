@@ -15,7 +15,8 @@ import io.ktor.http.content.PartData.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.jvm.javaio.*
 import io.ktor.utils.io.streams.*
-import org.apache.pdfbox.pdmodel.PDDocument.load
+import org.apache.pdfbox.Loader.*
+import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import kotlin.test.assertEquals
@@ -116,11 +117,11 @@ class ApplicationAdvancedMergeTest {
             )
 
             assertEquals(
-                expected = load(documentA).numberOfPages +
-                        load(documentVedleggA).numberOfPages +
-                        load(documentVedleggB).numberOfPages +
-                        load(documentB).numberOfPages + 3,
-                actual = load(bodyAsChannel().toInputStream()).numberOfPages,
+                expected = loadPDF(documentA).numberOfPages +
+                        loadPDF(documentVedleggA).numberOfPages +
+                        loadPDF(documentVedleggB).numberOfPages +
+                        loadPDF(documentB).numberOfPages + 3,
+                actual = loadPDF(RandomAccessReadBuffer(bodyAsChannel().toInputStream())).numberOfPages,
                 message = "The merged document should have a page count" +
                         " equal to the sum of pages in the input documents + " +
                         "a frontpage and two separatorpages"
@@ -198,8 +199,8 @@ class ApplicationAdvancedMergeTest {
             )
 
             assertEquals(
-                expected = load(documentA).numberOfPages + 2,
-                actual = load(bodyAsChannel().toInputStream()).numberOfPages,
+                expected = loadPDF(documentA).numberOfPages + 2,
+                actual = loadPDF(RandomAccessReadBuffer(bodyAsChannel().toInputStream())).numberOfPages,
                 message = "The merged document should have a page count" +
                         " equal to the sum of pages in the input document + " +
                         "a frontpage and one separatorpages"

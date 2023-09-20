@@ -15,7 +15,8 @@ import io.ktor.http.content.PartData.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.jvm.javaio.*
 import io.ktor.utils.io.streams.*
-import org.apache.pdfbox.pdmodel.PDDocument.load
+import org.apache.pdfbox.Loader.loadPDF
+import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -95,8 +96,8 @@ class ApplicationTest {
             )
 
             assertEquals(
-                expected = load(documentA).numberOfPages + load(documentB).numberOfPages,
-                actual = load(bodyAsChannel().toInputStream()).numberOfPages,
+                expected = loadPDF(documentA).numberOfPages + loadPDF(documentB).numberOfPages,
+                actual = loadPDF(RandomAccessReadBuffer(bodyAsChannel().toInputStream())).numberOfPages,
                 message = "The merged document should have a page count" +
                         " equal to the sum of pages in the input documents"
             )
