@@ -3,7 +3,6 @@ package no.nav.pensjon.pdfmerger
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
-import io.ktor.http.ContentType.Companion.parse
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
@@ -15,9 +14,8 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
-import io.micrometer.prometheus.PrometheusConfig.DEFAULT
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.exporter.common.TextFormat.*
+import io.micrometer.prometheusmetrics.PrometheusConfig.DEFAULT
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.pensjon.pdfmerger.routes.simpleMerge
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
@@ -63,10 +61,7 @@ fun Application.main() {
         }
 
         get("/metrics") {
-            call.respondText(
-                text = appMicrometerRegistry.scrape(CONTENT_TYPE_004),
-                contentType = parse(CONTENT_TYPE_004)
-            )
+            call.respond(appMicrometerRegistry.scrape())
         }
 
         simpleMerge(meteringPdfMerger)
