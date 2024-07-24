@@ -53,6 +53,10 @@ fun Application.main() {
 
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
+
+        format { call ->
+            "\"${call.request.httpMethod.value} ${call.request.uri} ${call.request.httpVersion}\" ${call.response.status()?.value}"
+        }
     }
 
     routing {
