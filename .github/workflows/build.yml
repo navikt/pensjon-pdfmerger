@@ -25,7 +25,7 @@ jobs:
 
       - name: Test Docker Image
         run: |
-          PDFMERGER_IMAGE=${docker_image} docker-compose up --exit-code-from test
+          PDFMERGER_IMAGE=${docker_image} docker compose up --exit-code-from test
 
       - name: Publish Docker image
         env:
