@@ -1,0 +1,39 @@
+name: 'Merge Main to Sandbox'
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mergeMainToSandbox:
+    permissions:
+      contents: "write"
+      checks: "write"
+      id-token: "write"
+      packages: "write"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+      - name: Merge Main to Sandbox
+        uses: robotology/gh-action-nightly-merge@v1.5.2
+        with:
+          stable_branch: 'main'
+          development_branch: 'sandbox'
+          allow_ff: true
+          allow_forks: true
+          user_name: GitHub Merge Actions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  call-build_sandbox:
+    needs: mergeMainToSandbox
+    permissions:
+      contents: "read"
+      checks: "write"
+      id-token: "write"
+      packages: "write"
+    secrets: inherit
+    uses: ./.github/workflows/build_sandbox.yml
