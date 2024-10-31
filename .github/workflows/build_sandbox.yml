@@ -4,7 +4,7 @@ name: "Build, push and deploy"
 on:
   push:
     branches:
-      - main
+      - sandbox
 
 env:
   IMAGE_BASE: ghcr.io/${{ github.repository }}
@@ -102,14 +102,14 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: "${{ steps.login.outputs.registry }}/${{ github.repository }}/pensjon-pdfmerger:${{ env.VERSION }},${{ steps.login.outputs.registry }}/${{ github.repository }}/pensjon-pdfmerger:main"
+          tags: "${{ steps.login.outputs.registry }}/${{ github.repository }}/pensjon-pdfmerger:${{ env.VERSION }},${{ steps.login.outputs.registry }}/${{ github.repository }}/pensjon-pdfmerger:sandbox"
           push: true
           cache-from: |
             "type=registry,ref=${{ steps.login.outputs.registry }}/${{ github.repository }}/pensjon-pdfmerger:main"
           cache-to: type=inline
 
   deployProd:
-    name: "Deploy prod"
+    name: "Deploy Dev"
     permissions:
       contents: "read"
       id-token: "write"
@@ -120,12 +120,12 @@ jobs:
       matrix:
         include:
           - app: pensjon-pdfmerger
-            resource: nais-prod.yml
-            cluster: prod-gcp
+            resource: nais-dev.yml
+            cluster: dev-gcp
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
-        name: "Deploy to NAIS PROD ${{ matrix.cluster }}"
+        name: "Deploy to NAIS DEV ${{ matrix.cluster }}"
         env:
           RESOURCE: ${{ matrix.resource }}
           IMAGE: "${{ needs.build.outputs.image }}"
