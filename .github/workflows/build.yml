@@ -1,10 +1,6 @@
 name: Build, push, and deploy
 
-on:
-  push:
-    branches:
-      - main
-      - sandbox
+on: [push]
 
 env:
   docker_image: test_image
@@ -81,7 +77,7 @@ jobs:
           IMAGE: "${{ needs.build.outputs.image }}"
 
   deployToDev:
-    if: ${{ github.actor != 'dependabot[bot]' }}
+    if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
     name: Deploy to dev
     permissions:
       id-token: "write"
