@@ -7,7 +7,7 @@ on:
       - sandbox
 
 env:
-  docker_image: docker.pkg.github.com/${{ github.repository }}/pensjon-pdfmerger:${{ github.sha }}
+  docker_image: test_image
 
 jobs:
 
@@ -16,6 +16,8 @@ jobs:
     permissions:
       packages: "write"
     runs-on: ubuntu-latest
+    outputs:
+      image: "${{ steps.set-outputs.outputs.IMAGE }}"
     steps:
       - uses: actions/checkout@v4
 
@@ -27,19 +29,46 @@ jobs:
         run: |
           PDFMERGER_IMAGE=${docker_image} docker compose up --exit-code-from test
 
-      - name: Publish Docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: NAIS login
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        uses: nais/login@v0
+        id: login
+        with:
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          team: teampensjon
+
+      - name: Docker meta
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ steps.login.outputs.registry }}/${{ steps.setup.outputs.REPO_NAME }}
+          tags: |
+            type=sha,prefix={{date 'YYYY.MM.DD-HH.mm'}}-,priority=9002
+
+      - name: Build and push
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        id: build_push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Set outputs
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        shell: bash
+        id: set-outputs
         run: |
-          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker push ${docker_image}
+          echo "IMAGE=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> $GITHUB_OUTPUT
 
   deployToProd:
+    if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
     name: Deploy to Prod
     permissions:
       id-token: "write"
     needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,9 +77,10 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: nais-prod.yml
-          VAR: image=${{ env.docker_image }}
+          IMAGE: "${{ needs.build.outputs.image }}"
 
   deployToDev:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: Deploy to dev
     permissions:
       id-token: "write"
@@ -63,4 +93,4 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: nais-dev.yml
-          VAR: image=${{ env.docker_image }}
+          IMAGE: "${{ needs.build.outputs.image }}"
