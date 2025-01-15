@@ -45,7 +45,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ steps.login.outputs.registry }}/${{ steps.setup.outputs.REPO_NAME }}
+            ${{ steps.login.outputs.registry }}/${{ github.repository }}/${{ github.repository_owner}}
           tags: |
             type=sha,prefix={{date 'YYYY.MM.DD-HH.mm'}}-,priority=9002
 
