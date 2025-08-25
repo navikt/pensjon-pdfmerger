@@ -1,7 +1,7 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
-import com.lowagie.text.Document
-import com.lowagie.text.Paragraph
+import org.openpdf.text.Document
+import org.openpdf.text.Paragraph
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.EMPTY_PARAGRAPH
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.INFO_FONT_BOLD
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.PAGE_MARGIN

@@ -1,9 +1,9 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
-import com.lowagie.text.Image.getInstance
-import com.lowagie.text.PageSize.A4
-import com.lowagie.text.pdf.PdfReader
-import com.lowagie.text.pdf.PdfWriter
+import org.openpdf.text.Image.getInstance
+import org.openpdf.text.PageSize.A4
+import org.openpdf.text.pdf.PdfReader
+import org.openpdf.text.pdf.PdfWriter
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.PAGE_MARGIN
 import no.nav.pensjon.pdfmerger.advancedMerge.models.Dokumentinfo
 import java.io.Closeable

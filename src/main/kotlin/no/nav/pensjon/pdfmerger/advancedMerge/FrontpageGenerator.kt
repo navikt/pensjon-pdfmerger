@@ -1,12 +1,12 @@
 package no.nav.pensjon.pdfmerger.advancedMerge
 
-import com.lowagie.text.Chunk
-import com.lowagie.text.Font
-import com.lowagie.text.Paragraph
-import com.lowagie.text.Paragraph.ALIGN_CENTER
-import com.lowagie.text.Phrase
-import com.lowagie.text.pdf.PdfPCell
-import com.lowagie.text.pdf.PdfPTable
+import org.openpdf.text.Chunk
+import org.openpdf.text.Font
+import org.openpdf.text.Paragraph
+import org.openpdf.text.Paragraph.ALIGN_CENTER
+import org.openpdf.text.Phrase
+import org.openpdf.text.pdf.PdfPCell
+import org.openpdf.text.pdf.PdfPTable
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.EMPTY_PARAGRAPH
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.INFO_FONT_BOLD
 import no.nav.pensjon.pdfmerger.advancedMerge.MergeContext.Companion.SPACING
