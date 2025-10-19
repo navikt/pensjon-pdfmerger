@@ -11,9 +11,7 @@ import io.ktor.http.ContentType.MultiPart.FormData
 import io.ktor.http.HttpHeaders.ContentDisposition
 import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
-import io.ktor.http.content.PartData.*
 import io.ktor.server.testing.*
-import io.ktor.utils.io.streams.*
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import kotlin.test.assertEquals
@@ -40,14 +38,10 @@ class ApplicationAdvancedMergeExceptionTest {
             )
             setBody(
                 MultiPartFormDataContent(
-                    boundary = boundary,
-                    parts = listOf(
-                        FormItem(
-                            value = mergeRequest,
-                            dispose = {},
-                            partHeaders = headersOf()
-                        )
-                    )
+                    formData {
+                        append("mergeinfo", mergeRequest)
+                    },
+                    boundary = boundary
                 )
             )
         }.apply {
@@ -76,20 +70,20 @@ class ApplicationAdvancedMergeExceptionTest {
             )
             setBody(
                 MultiPartFormDataContent(
-                    boundary = boundary,
-                    parts = listOf(
-                        FileItem(
-                            provider = { documentA.inputStream().asInput() },
-                            dispose = {},
-                            partHeaders = headersOf(
-                                name = ContentDisposition,
-                                value = File
+                    formData {
+                        append(
+                            "a",
+                            documentA,
+                            Headers.build {
+                                append(ContentDisposition, File
                                     .withParameter(Name, "a")
                                     .withParameter(FileName, "a.pdf")
-                                    .toString()
-                            )
+                                    .toString())
+                                append(HttpHeaders.ContentType, io.ktor.http.ContentType.Application.Pdf.toString())
+                            }
                         )
-                    )
+                    },
+                    boundary = boundary
                 )
             )
         }.apply {
@@ -117,37 +111,32 @@ class ApplicationAdvancedMergeExceptionTest {
             )
             setBody(
                 MultiPartFormDataContent(
-
-                    boundary = boundary,
-                    parts = listOf(
-                        FormItem(
-                            value = mergeRequest,
-                            dispose = {},
-                            partHeaders = headersOf()
-                        ),
-                        FileItem(
-                            provider = { documentA.inputStream().asInput() },
-                            dispose = {},
-                            partHeaders = headersOf(
-                                name = ContentDisposition,
-                                value = File
+                    formData {
+                        append("mergeinfo", mergeRequest)
+                        append(
+                            "a",
+                            documentA,
+                            Headers.build {
+                                append(ContentDisposition, File
                                     .withParameter(Name, "a")
                                     .withParameter(FileName, "a.pdf")
-                                    .toString()
-                            )
-                        ),
-                        FileItem(
-                            provider = { documentA.inputStream().asInput() },
-                            dispose = {},
-                            partHeaders = headersOf(
-                                name = ContentDisposition,
-                                value = File
+                                    .toString())
+                                append(HttpHeaders.ContentType, io.ktor.http.ContentType.Application.Pdf.toString())
+                            }
+                        )
+                        append(
+                            "a_again",
+                            documentA,
+                            Headers.build {
+                                append(ContentDisposition, File
                                     .withParameter(Name, "a_again")
                                     .withParameter(FileName, "a.pdf")
-                                    .toString()
-                            )
+                                    .toString())
+                                append(HttpHeaders.ContentType, io.ktor.http.ContentType.Application.Pdf.toString())
+                            }
                         )
-                    )
+                    },
+                    boundary = boundary
                 )
             )
         }.apply {

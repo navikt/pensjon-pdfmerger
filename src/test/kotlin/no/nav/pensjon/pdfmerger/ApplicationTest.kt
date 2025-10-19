@@ -11,10 +11,8 @@ import io.ktor.http.ContentType.MultiPart.FormData
 import io.ktor.http.HttpHeaders.ContentDisposition
 import io.ktor.http.HttpHeaders.ContentType
 import io.ktor.http.HttpStatusCode.Companion.OK
-import io.ktor.http.content.PartData.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.jvm.javaio.*
-import io.ktor.utils.io.streams.*
 import org.apache.pdfbox.Loader.loadPDF
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.junit.jupiter.api.Test
@@ -62,31 +60,31 @@ class ApplicationTest {
             )
             setBody(
                 MultiPartFormDataContent(
-                    boundary = boundary,
-                    parts = listOf(
-                        FileItem(
-                            provider = { documentA.inputStream().asInput() },
-                            dispose = {},
-                            partHeaders = headersOf(
-                                name = ContentDisposition,
-                                value = File
+                    formData {
+                        append(
+                            "a",
+                            documentA,
+                            Headers.build {
+                                append(ContentDisposition, File
                                     .withParameter(Name, "a")
                                     .withParameter(FileName, "a.pdf")
-                                    .toString()
-                            )
-                        ),
-                        FileItem(
-                            provider = { documentB.inputStream().asInput() },
-                            dispose = {},
-                            partHeaders = headersOf(
-                                name = ContentDisposition,
-                                value = File
+                                    .toString())
+                                append(HttpHeaders.ContentType, io.ktor.http.ContentType.Application.Pdf.toString())
+                            }
+                        )
+                        append(
+                            "b",
+                            documentB,
+                            Headers.build {
+                                append(ContentDisposition, File
                                     .withParameter(Name, "b")
                                     .withParameter(FileName, "b.pdf")
-                                    .toString()
-                            )
-                        ),
-                    )
+                                    .toString())
+                                append(HttpHeaders.ContentType, io.ktor.http.ContentType.Application.Pdf.toString())
+                            }
+                        )
+                    },
+                    boundary = boundary
                 )
             )
         }.apply {

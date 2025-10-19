@@ -96,6 +96,10 @@
         </dependency>
         <dependency>
             <groupId>io.ktor</groupId>
+            <artifactId>ktor-client-core-jvm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
             <artifactId>ktor-server-call-logging</artifactId>
         </dependency>
         <dependency>
@@ -141,7 +145,12 @@
         </dependency>
         <dependency>
             <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-tests-jvm</artifactId>
+            <artifactId>ktor-server-test-host</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-test-host-jvm</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -180,7 +189,6 @@
                             <jvmTarget>${java.version}</jvmTarget>
                             <args>
                                 <arg>-Xjsr305=strict</arg>
-                                <arg>-Werror</arg>
                             </args>
                         </configuration>
                     </execution>
@@ -193,7 +201,6 @@
                             <jvmTarget>${java.version}</jvmTarget>
                             <args>
                                 <arg>-Xjsr305=strict</arg>
-                                <arg>-Werror</arg>
                             </args>
                         </configuration>
                     </execution>

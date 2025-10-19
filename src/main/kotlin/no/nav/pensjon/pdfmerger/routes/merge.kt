@@ -12,18 +12,25 @@ import no.nav.pensjon.pdfmerger.logger
 fun Route.simpleMerge(meteringPdfMerger: MeteringPdfMerger) {
     post("/merge") {
         try {
-            val documents = call.receiveMultipart()
-                .readAllParts()
-                .filterIsInstance<PartData.FileItem>()
-                .map { it.streamProvider().readAllBytes() }
+            val multipart = call.receiveMultipart()
+            val documents = mutableListOf<ByteArray>()
+            multipart.forEachPart { part ->
+                if (part is PartData.FileItem) {
+                    documents += part.streamProvider().readAllBytes()
+                }
+                part.dispose()
+            }
 
             val mergedDocument = meteringPdfMerger.mergeDocuments(documents)
 
             call.respondBytes(bytes = mergedDocument, contentType = ContentType.Application.Pdf)
         } catch (e: Exception) {
             logger.error("Unable to merge pdf documents", e)
-            call.response.status(HttpStatusCode.InternalServerError)
-            call.respondText { "Unable to merge PDF documents ${e.message}" }
+            call.respondText(
+                text = "Unable to merge PDF documents: ${e.message}",
+                contentType = ContentType.Text.Plain,
+                status = HttpStatusCode.InternalServerError
+            )
         }
     }
 }
