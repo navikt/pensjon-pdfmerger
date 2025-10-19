@@ -1,16 +1,19 @@
-package no.nav.pensjon.pdfmerger
+package no.nav.pensjon.pdfmerger.routes
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.Pdf
 import io.ktor.http.content.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.utils.io.readRemaining
+import kotlinx.io.readByteArray
+import no.nav.pensjon.pdfmerger.MeteringPdfMerger
 import no.nav.pensjon.pdfmerger.advancedMerge.mapRequestToDomain
 import no.nav.pensjon.pdfmerger.advancedMerge.models.MergeInfo
+import no.nav.pensjon.pdfmerger.logger
 
 fun Route.mergeWithSeparator(meteringPdfMerger: MeteringPdfMerger, mapper: JsonMapper) {
     post("/mergeWithSeparator") {
@@ -29,7 +32,8 @@ fun Route.mergeWithSeparator(meteringPdfMerger: MeteringPdfMerger, mapper: JsonM
                                         "file $filename appears several times"
                             )
                         }
-                        documents[filename] = part.streamProvider().readBytes()
+                        val channel = part.provider()
+                        documents[filename] = channel.readRemaining().readByteArray()
                     }
 
                     is PartData.FormItem -> {

@@ -2,10 +2,11 @@ package no.nav.pensjon.pdfmerger.routes
 
 import io.ktor.http.*
 import io.ktor.http.content.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.utils.io.readRemaining
+import kotlinx.io.readByteArray
 import no.nav.pensjon.pdfmerger.MeteringPdfMerger
 import no.nav.pensjon.pdfmerger.logger
 
@@ -16,7 +17,8 @@ fun Route.simpleMerge(meteringPdfMerger: MeteringPdfMerger) {
             val documents = mutableListOf<ByteArray>()
             multipart.forEachPart { part ->
                 if (part is PartData.FileItem) {
-                    documents += part.streamProvider().readAllBytes()
+                    val channel = part.provider()
+                    documents += channel.readRemaining().readByteArray()
                 }
                 part.dispose()
             }

@@ -189,6 +189,7 @@
                             <jvmTarget>${java.version}</jvmTarget>
                             <args>
                                 <arg>-Xjsr305=strict</arg>
+                                <arg>-Werror</arg>
                             </args>
                         </configuration>
                     </execution>
@@ -201,6 +202,7 @@
                             <jvmTarget>${java.version}</jvmTarget>
                             <args>
                                 <arg>-Xjsr305=strict</arg>
+                                <arg>-Werror</arg>
                             </args>
                         </configuration>
                     </execution>
