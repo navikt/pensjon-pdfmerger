@@ -21,7 +21,7 @@ fun Route.mergeWithSeparator(meteringPdfMerger: MeteringPdfMerger, mapper: JsonM
             var info: MergeInfo? = null
             val documents: MutableMap<String, ByteArray> = mutableMapOf()
 
-            val multipartData = call.receiveMultipart()
+            val multipartData = call.receiveMultipart(formFieldLimit = 1024 * 1024 * 250) // 250 MB limit
             multipartData.forEachPart { part ->
                 when (part) {
                     is PartData.FileItem -> {
