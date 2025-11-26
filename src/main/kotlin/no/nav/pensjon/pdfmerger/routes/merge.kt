@@ -13,7 +13,7 @@ import no.nav.pensjon.pdfmerger.logger
 fun Route.simpleMerge(meteringPdfMerger: MeteringPdfMerger) {
     post("/merge") {
         try {
-            val multipart = call.receiveMultipart()
+            val multipart = call.receiveMultipart(formFieldLimit = 1024 * 1024 * 250) // 250 MB limit
             val documents = mutableListOf<ByteArray>()
             multipart.forEachPart { part ->
                 if (part is PartData.FileItem) {
