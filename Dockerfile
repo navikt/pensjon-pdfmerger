@@ -11,7 +11,7 @@ COPY src /build/src
 RUN find .
 RUN mvn -Dkotlin.format.skip=true verify
 
-FROM eclipse-temurin:21
+FROM eclipse-temurin:24
 
 RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
 
