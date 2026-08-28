@@ -1,4 +1,4 @@
-FROM maven:3-eclipse-temurin-21 AS build
+FROM maven:3-eclipse-temurin-25 AS build
 
 # Cache maven dependencies
 WORKDIR /build
@@ -11,11 +11,10 @@ COPY src /build/src
 RUN find .
 RUN mvn -Dkotlin.format.skip=true verify
 
-FROM eclipse-temurin:21
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
 
-RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir /app
+WORKDIR /app
 COPY --from=build /build/target/pdfmerger-jar-with-dependencies.jar /app/pdfmerger.jar
 
-CMD [ "/usr/bin/dumb-init", "java", "-jar", "/app/pdfmerger.jar"]
+USER 65532:65532
+CMD [ "-jar", "/app/pdfmerger.jar"]
