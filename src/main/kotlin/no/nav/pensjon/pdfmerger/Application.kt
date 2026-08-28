@@ -1,8 +1,7 @@
 package no.nav.pensjon.pdfmerger
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jsonMapper
-import com.fasterxml.jackson.module.kotlin.kotlinModule
+import tools.jackson.module.kotlin.jsonMapper
+import tools.jackson.module.kotlin.kotlinModule
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
@@ -28,7 +27,6 @@ fun Application.main() {
     val meteringPdfMerger = MeteringPdfMerger()
     val mapper = jsonMapper {
         addModule(kotlinModule())
-        addModule(JavaTimeModule())
     }
 
     val appMicrometerRegistry = PrometheusMeterRegistry(DEFAULT)

@@ -1,7 +1,7 @@
 package no.nav.pensjon.pdfmerger.routes
 
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.Pdf
 import io.ktor.http.content.*
