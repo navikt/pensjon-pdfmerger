@@ -20,7 +20,7 @@ fun Route.simpleMerge(meteringPdfMerger: MeteringPdfMerger) {
                     val channel = part.provider()
                     documents += channel.readRemaining().readByteArray()
                 }
-                part.dispose()
+                part.release()
             }
 
             val mergedDocument = meteringPdfMerger.mergeDocuments(documents)
