@@ -34,6 +34,17 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!--
+             Importerer Netty for å overstyre versjonen fra ktor 3.5.2 som inneholder følgende sårbarhet
+             https://nvd.nist.gov/vuln/detail/cve-2026-59903
+            -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.2.17.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>io.ktor</groupId>
                 <artifactId>ktor-bom</artifactId>
