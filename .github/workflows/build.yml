@@ -18,12 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
+      - uses: nais/login@v0
+        with:
+          team: teampensjon
+
       - name: Build Docker Image
         run: |
           docker build --tag ${docker_image} .
 
       - name: Test Docker Image
+        env:
+          COMPOSE_BAKE: "false"
         run: |
+          docker buildx use default
           PDFMERGER_IMAGE=${docker_image} docker compose up --exit-code-from test
 
       - name: Build and push

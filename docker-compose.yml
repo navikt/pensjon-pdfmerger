@@ -2,9 +2,14 @@ version: "2.4"
 services:
   pdfmerger:
     container_name: pdfmerger
-    image: ${PDFMERGER_IMAGE}
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM ${PDFMERGER_IMAGE}
+        COPY --from=busybox:stable-musl /bin/wget /usr/bin/wget
+      pull: false
     healthcheck:
-      test: curl http://localhost:8080/ping
+      test: ["CMD", "/usr/bin/wget", "-q", "-O", "/dev/null", "http://localhost:8080/ping"]
       interval: 1s
       timeout: 3s
       retries: 60
