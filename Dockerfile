@@ -11,7 +11,7 @@ COPY src /build/src
 RUN find .
 RUN mvn -Dkotlin.format.skip=true verify
 
-FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-26
 
 WORKDIR /app
 COPY --from=build /build/target/pdfmerger-jar-with-dependencies.jar /app/pdfmerger.jar
