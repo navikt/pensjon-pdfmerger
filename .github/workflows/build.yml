@@ -57,7 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Deploy to prod
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: nais-prod.yml
@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Deploy to dev
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: nais-dev.yml
