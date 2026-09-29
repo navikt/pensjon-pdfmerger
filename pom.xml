@@ -19,7 +19,7 @@
         <java.version>25</java.version>
         <kotlin.version>2.4.20</kotlin.version>
         <pdfbox.version>3.0.8</pdfbox.version>
-        <slf4j.version>2.0.18</slf4j.version>
+        <slf4j.version>2.0.20</slf4j.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
